@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html; charset=utf-8" http-equiv=
+  "Content-Type">
+  <title>7drl</title>
+</head>
+<body>
+  <canvas id="canvas" width="640" height="480"></canvas>
+  <script src="./floyza-7drl-2023.js"></script>
+  <script>
+      window.addEventListener("load", async () => {
+        await wasm_bindgen("./floyza-7drl-2023_bg.wasm");
+      });
+  </script>
+</body>
+</html>
