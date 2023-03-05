@@ -101,6 +101,9 @@ fn main() -> BError {
             bg: RGB::named(BLACK),
             layer: 1,
         },
+        Inventory {
+            contents: Vec::new(),
+        },
     ));
 
     // generate some simple stuff for testing

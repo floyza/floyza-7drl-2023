@@ -1,4 +1,5 @@
 use bracket_lib::prelude::*;
+use hecs::Entity;
 
 #[derive(Debug)]
 pub struct Health(pub i32);
@@ -29,3 +30,7 @@ pub struct Monster {}
 
 #[derive(Debug)]
 pub struct Item {}
+
+pub struct Inventory {
+    pub contents: Vec<Entity>,
+}
