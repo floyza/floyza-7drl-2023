@@ -3,11 +3,13 @@ use commands::Command;
 use components::*;
 use hecs::{Entity, Satisfies, World};
 use messages::MessageLog;
+use ui::{inventory_ui::InventoryUI, UI};
 
 pub mod commands;
 pub mod components;
 pub mod map;
 pub mod messages;
+pub mod ui;
 
 pub struct State {
     pub ecs: World,
@@ -16,22 +18,65 @@ pub struct State {
     pub rng: RandomNumberGenerator,
     pub messages: MessageLog,
     pub has_moved: bool,
+    pub ui: ui::UI,
+}
+
+impl State {
+    fn run_systems(&mut self) {
+        system_tile_contents(self);
+        system_calc_viewpoints(self);
+        messages::handle_messages(self); // HMM TODO
+    }
+    fn render(&self, ctx: &mut BTerm) {
+        ctx.cls();
+        map::draw_map(self, ctx);
+        match &self.ui {
+            UI::Playing => {}
+            UI::Inventory { ui } => {
+                ui.render(self, ctx);
+            }
+        }
+    }
 }
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
-        let player_acted = if let Some(key) = ctx.key {
-            player_act(self, key)
-        } else {
-            false
-        };
-        if player_acted || !self.has_moved {
+        if !self.has_moved {
             self.has_moved = true;
-            // make monsters act
-            system_tile_contents(self);
-            system_calc_viewpoints(self);
-            map::draw_map(self, ctx);
-            messages::handle_messages(self);
+            self.run_systems();
+            self.render(ctx);
+        }
+        if let Some(key) = ctx.key {
+            match &mut self.ui {
+                UI::Playing => {
+                    let player_used_turn = player_act(self, key);
+                    if player_used_turn { /* monsters act here */ }
+                    self.run_systems();
+                    self.render(ctx);
+                }
+                UI::Inventory { ui } => {
+                    let inventory = self
+                        .ecs
+                        .query_one_mut::<&Inventory>(self.player_entity)
+                        .unwrap();
+                    match key {
+                        VirtualKeyCode::K | VirtualKeyCode::Up => {
+                            ui.selection = std::cmp::max(0, ui.selection - 1);
+                        }
+                        VirtualKeyCode::J | VirtualKeyCode::Down => {
+                            ui.selection = std::cmp::min(
+                                inventory.contents.len() as i32 - 1,
+                                ui.selection + 1,
+                            );
+                        }
+                        VirtualKeyCode::Escape | VirtualKeyCode::Q => {
+                            self.ui = UI::Playing;
+                        }
+                        _ => {}
+                    }
+                    self.render(ctx);
+                }
+            }
         }
     }
 }
@@ -100,6 +145,7 @@ fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
             target: Point::new(1, 1),
         }),
         VirtualKeyCode::G => Some(Command::Grab),
+        VirtualKeyCode::I => Some(Command::OpenInventory),
         _ => None,
     };
     match act {
@@ -150,6 +196,16 @@ fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
                 false
             }
         }
+        Some(Command::OpenInventory) => {
+            let inventory = state
+                .ecs
+                .query_one_mut::<&mut Inventory>(state.player_entity)
+                .unwrap();
+            state.ui = UI::Inventory {
+                ui: InventoryUI { selection: 0 },
+            };
+            false
+        }
         None => false,
     }
 }
@@ -191,6 +247,17 @@ fn main() -> BError {
         },
         Name("Potion of Redness".to_string()),
     ));
+    world.spawn((
+        Position(map.rooms[0].center() + Point::new(1, 1)),
+        Item {},
+        Renderable {
+            glyph: to_cp437('!'),
+            fg: RGB::named(BLUE),
+            bg: RGB::named(BLACK),
+            layer: 0,
+        },
+        Name("Potion of Blueness".to_string()),
+    ));
 
     let state = State {
         ecs: world,
@@ -202,6 +269,7 @@ fn main() -> BError {
             queue: Vec::new(),
         },
         has_moved: false,
+        ui: UI::Playing,
     };
 
     let context = BTermBuilder::simple80x50()
