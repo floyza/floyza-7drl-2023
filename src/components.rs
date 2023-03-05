@@ -31,6 +31,10 @@ pub struct Monster {}
 #[derive(Debug)]
 pub struct Item {}
 
+#[derive(Debug)]
 pub struct Inventory {
     pub contents: Vec<Entity>,
 }
+
+#[derive(Debug)]
+pub struct Name(pub String);

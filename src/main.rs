@@ -2,16 +2,19 @@ use bracket_lib::prelude::*;
 use commands::Command;
 use components::*;
 use hecs::{Entity, Satisfies, World};
+use messages::MessageLog;
 
 pub mod commands;
 pub mod components;
 pub mod map;
+pub mod messages;
 
 pub struct State {
     pub ecs: World,
     pub map: map::Map,
     pub player_entity: Entity,
     pub rng: RandomNumberGenerator,
+    pub messages: MessageLog,
 }
 
 impl GameState for State {
@@ -24,8 +27,20 @@ impl GameState for State {
         if player_acted {
             // make monsters act
         }
+        system_tile_contents(self);
         system_calc_viewpoints(self);
         map::draw_map(self, ctx);
+        messages::handle_messages(self);
+    }
+}
+
+fn system_tile_contents(state: &mut State) {
+    for tile in state.map.tile_contents.iter_mut() {
+        tile.clear();
+    }
+    for (id, pos) in state.ecs.query_mut::<&Position>() {
+        let idx = state.map.point2d_to_index(pos.0);
+        state.map.tile_contents[idx].push(id);
     }
 }
 
@@ -90,7 +105,7 @@ fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
             let (position, viewer) = state
                 .ecs
                 .query_one_mut::<(&mut Position, &mut Viewer)>(state.player_entity)
-                .expect("Player doesn't have expected components");
+                .unwrap();
             let new_pt = position.0 + move_pt;
             let new_idx = state.map.point2d_to_index(new_pt);
             if state.map.is_available_exit(new_idx) {
@@ -103,7 +118,7 @@ fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
             let position = state
                 .ecs
                 .query_one_mut::<&Position>(state.player_entity)
-                .expect("Player doesn't have expected components");
+                .unwrap();
             let mut items = Vec::new();
             for item in state.map.tile_contents[state.map.point2d_to_index(position.0)].iter() {
                 if state
@@ -115,12 +130,19 @@ fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
                 }
             }
             if let Some(item) = items.first() {
-                state.ecs.remove_one::<&Position>(*item).unwrap(); // we already ascertained that it has a component
+                state.ecs.remove_one::<Position>(*item).unwrap(); // we already ascertained that it has a component
                 let inv = state
                     .ecs
                     .query_one_mut::<&mut Inventory>(state.player_entity)
-                    .expect("Player doesn't have expected components");
+                    .unwrap();
                 inv.contents.push(*item);
+                if let Some(name) = state.ecs.query_one_mut::<&Name>(*item).ok() {
+                    state
+                        .messages
+                        .enqueue_message(&format!("You pick up a {}.", name.0));
+                } else {
+                    state.messages.enqueue_message("You pick something up.");
+                }
                 true
             } else {
                 false
@@ -152,6 +174,7 @@ fn main() -> BError {
         Inventory {
             contents: Vec::new(),
         },
+        Name("Bob".to_string()),
     ));
 
     // generate some simple stuff for testing
@@ -164,6 +187,7 @@ fn main() -> BError {
             bg: RGB::named(BLACK),
             layer: 0,
         },
+        Name("Potion of Redness".to_string()),
     ));
 
     let state = State {
@@ -171,6 +195,10 @@ fn main() -> BError {
         map,
         player_entity,
         rng: RandomNumberGenerator::new(),
+        messages: MessageLog {
+            log: Vec::new(),
+            queue: Vec::new(),
+        },
     };
 
     let context = BTermBuilder::simple80x50()
