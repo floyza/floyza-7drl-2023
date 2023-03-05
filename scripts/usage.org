@@ -1,0 +1,9 @@
+#+title: Usage
+
+Firstly, install the dependencies (assuming you are using rustup)
+#+begin_src bash
+cargo install wasm-bindgen-cli
+rustup target add wasm32-unknown-unknown
+#+end_src
+
+Then, use =scripts/build-web.sh= in the project base dir to build, and =scripts/host-web.sh= in the project base dir to open in your web browser.
