@@ -1,4 +1,5 @@
 use crate::State;
+use bracket_lib::prelude::*;
 
 pub struct MessageLog {
     pub log: Vec<String>,
@@ -13,7 +14,7 @@ impl MessageLog {
 
 pub fn handle_messages(state: &mut State) {
     for msg in std::mem::take(&mut state.messages.queue) {
-        println!("{}", msg);
+        console::log(&format!("{}", msg));
         state.messages.log.push(msg);
     }
 }

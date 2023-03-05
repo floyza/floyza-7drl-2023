@@ -15,6 +15,7 @@ pub struct State {
     pub player_entity: Entity,
     pub rng: RandomNumberGenerator,
     pub messages: MessageLog,
+    pub has_moved: bool,
 }
 
 impl GameState for State {
@@ -24,13 +25,14 @@ impl GameState for State {
         } else {
             false
         };
-        if player_acted {
+        if player_acted || !self.has_moved {
+            self.has_moved = true;
             // make monsters act
+            system_tile_contents(self);
+            system_calc_viewpoints(self);
+            map::draw_map(self, ctx);
+            messages::handle_messages(self);
         }
-        system_tile_contents(self);
-        system_calc_viewpoints(self);
-        map::draw_map(self, ctx);
-        messages::handle_messages(self);
     }
 }
 
@@ -199,6 +201,7 @@ fn main() -> BError {
             log: Vec::new(),
             queue: Vec::new(),
         },
+        has_moved: false,
     };
 
     let context = BTermBuilder::simple80x50()
