@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use crate::components::*;
 use bracket_lib::prelude::*;
 
@@ -151,6 +153,10 @@ impl Map {
     }
 }
 
+pub fn populate_map(state: &mut State) {
+    // let mut new_monsters: Vec<Point> = Vec::new();
+}
+
 pub fn draw_map(state: &State, ctx: &mut BTerm) {
     let mut y = 0;
     let mut x = 0;
@@ -174,7 +180,7 @@ pub fn draw_map(state: &State, ctx: &mut BTerm) {
             ctx.set(x, y, fg, RGB::from_f32(0., 0., 0.), glyph);
         }
         x += 1;
-        if x > 79 {
+        if x >= state.map.width {
             x = 0;
             y += 1;
         }
@@ -184,9 +190,21 @@ pub fn draw_map(state: &State, ctx: &mut BTerm) {
 }
 
 fn draw_entities(state: &State, ctx: &mut BTerm) {
+    let mut renderings: BTreeMap<i32, Vec<(Renderable, Point)>> = BTreeMap::new();
     for (_id, (pos, render)) in state.ecs.query::<(&Position, &Renderable)>().iter() {
         if state.map.visible_tiles[state.map.point2d_to_index(pos.0)] {
-            ctx.set(pos.0.x, pos.0.y, render.fg, render.bg, render.glyph);
+            if !renderings.contains_key(&render.layer) {
+                renderings.insert(render.layer, Vec::new());
+            }
+            renderings
+                .get_mut(&render.layer)
+                .unwrap()
+                .push((render.clone(), pos.0.clone()));
+        }
+    }
+    for (_layer_id, layer) in renderings {
+        for (render, pos) in layer {
+            ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
         }
     }
 }

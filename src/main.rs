@@ -9,6 +9,7 @@ pub struct State {
     pub ecs: World,
     pub map: map::Map,
     pub player_entity: Entity,
+    pub rng: RandomNumberGenerator,
 }
 
 impl GameState for State {
@@ -98,12 +99,27 @@ fn main() -> BError {
             glyph: to_cp437('@'),
             fg: RGB::named(GREEN),
             bg: RGB::named(BLACK),
+            layer: 1,
         },
     ));
+
+    // generate some simple stuff for testing
+    world.spawn((
+        Position(map.rooms[0].center() + Point::new(0, 1)),
+        Item {},
+        Renderable {
+            glyph: to_cp437('!'),
+            fg: RGB::named(RED),
+            bg: RGB::named(BLACK),
+            layer: 0,
+        },
+    ));
+
     let state = State {
         ecs: world,
         map,
         player_entity,
+        rng: RandomNumberGenerator::new(),
     };
 
     let context = BTermBuilder::simple80x50()
