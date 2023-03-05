@@ -38,3 +38,9 @@ pub struct Inventory {
 
 #[derive(Debug)]
 pub struct Name(pub String);
+
+#[derive(Debug)]
+pub enum Grower {
+    Growing { seed: Entity, num_left: u32 },
+    Empty,
+}

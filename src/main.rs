@@ -106,6 +106,7 @@ fn main() -> BError {
             contents: Vec::new(),
         },
         Name("Bob".to_string()),
+        Grower::Empty,
     ));
 
     // generate some simple stuff for testing
