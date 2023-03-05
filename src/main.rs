@@ -1,7 +1,9 @@
 use bracket_lib::prelude::*;
+use commands::Command;
 use components::*;
 use hecs::{Entity, Satisfies, World};
 
+pub mod commands;
 pub mod components;
 pub mod map;
 
@@ -55,31 +57,77 @@ fn system_calc_viewpoints(state: &mut State) {
 }
 
 fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
-    let move_pt = match key {
-        VirtualKeyCode::H | VirtualKeyCode::Left => Some(Point::new(-1, 0)),
-        VirtualKeyCode::L | VirtualKeyCode::Right => Some(Point::new(1, 0)),
-        VirtualKeyCode::K | VirtualKeyCode::Up => Some(Point::new(0, -1)),
-        VirtualKeyCode::J | VirtualKeyCode::Down => Some(Point::new(0, 1)),
-        VirtualKeyCode::Y => Some(Point::new(-1, -1)),
-        VirtualKeyCode::U => Some(Point::new(1, -1)),
-        VirtualKeyCode::B => Some(Point::new(-1, 1)),
-        VirtualKeyCode::N => Some(Point::new(1, 1)),
+    let act: Option<Command> = match key {
+        VirtualKeyCode::H | VirtualKeyCode::Left => Some(Command::Move {
+            target: Point::new(-1, 0),
+        }),
+        VirtualKeyCode::L | VirtualKeyCode::Right => Some(Command::Move {
+            target: Point::new(1, 0),
+        }),
+        VirtualKeyCode::K | VirtualKeyCode::Up => Some(Command::Move {
+            target: Point::new(0, -1),
+        }),
+        VirtualKeyCode::J | VirtualKeyCode::Down => Some(Command::Move {
+            target: Point::new(0, 1),
+        }),
+        VirtualKeyCode::Y => Some(Command::Move {
+            target: Point::new(-1, -1),
+        }),
+        VirtualKeyCode::U => Some(Command::Move {
+            target: Point::new(1, -1),
+        }),
+        VirtualKeyCode::B => Some(Command::Move {
+            target: Point::new(-1, 1),
+        }),
+        VirtualKeyCode::N => Some(Command::Move {
+            target: Point::new(1, 1),
+        }),
+        VirtualKeyCode::G => Some(Command::Grab),
         _ => None,
     };
-    if let Some(move_pt) = move_pt {
-        let (position, viewer) = state
-            .ecs
-            .query_one_mut::<(&mut Position, &mut Viewer)>(state.player_entity)
-            .expect("Player doesn't have expected components");
-        let new_pt = position.0 + move_pt;
-        let new_idx = state.map.point2d_to_index(new_pt);
-        if state.map.is_available_exit(new_idx) {
-            position.0 = new_pt;
-            viewer.dirty = true;
+    match act {
+        Some(Command::Move { target: move_pt }) => {
+            let (position, viewer) = state
+                .ecs
+                .query_one_mut::<(&mut Position, &mut Viewer)>(state.player_entity)
+                .expect("Player doesn't have expected components");
+            let new_pt = position.0 + move_pt;
+            let new_idx = state.map.point2d_to_index(new_pt);
+            if state.map.is_available_exit(new_idx) {
+                position.0 = new_pt;
+                viewer.dirty = true;
+            }
+            true
         }
-        return true;
+        Some(Command::Grab) => {
+            let position = state
+                .ecs
+                .query_one_mut::<&Position>(state.player_entity)
+                .expect("Player doesn't have expected components");
+            let mut items = Vec::new();
+            for item in state.map.tile_contents[state.map.point2d_to_index(position.0)].iter() {
+                if state
+                    .ecs
+                    .satisfies::<(&Item, &Position)>(*item)
+                    .unwrap_or(false)
+                {
+                    items.push(*item);
+                }
+            }
+            if let Some(item) = items.first() {
+                state.ecs.remove_one::<&Position>(*item).unwrap(); // we already ascertained that it has a component
+                let inv = state
+                    .ecs
+                    .query_one_mut::<&mut Inventory>(state.player_entity)
+                    .expect("Player doesn't have expected components");
+                inv.contents.push(*item);
+                true
+            } else {
+                false
+            }
+        }
+        None => false,
     }
-    return false;
 }
 
 fn main() -> BError {

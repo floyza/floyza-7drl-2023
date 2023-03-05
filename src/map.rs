@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 
 use crate::components::*;
 use bracket_lib::prelude::*;
+use hecs::Entity;
 
 use crate::State;
 
@@ -18,6 +19,7 @@ pub struct Map {
     pub rooms: Vec<Rect>,
     pub visible_tiles: Vec<bool>,
     pub revealed_tiles: Vec<bool>,
+    pub tile_contents: Vec<Vec<Entity>>, // TODO update this
 }
 
 impl Algorithm2D for Map {
@@ -76,6 +78,7 @@ impl Map {
             height: 50,
             visible_tiles: vec![false; 80 * 50],
             revealed_tiles: vec![false; 80 * 50],
+            tile_contents: vec![Vec::new(); 80 * 50],
         };
 
         let mut rooms = Vec::<Rect>::new();
