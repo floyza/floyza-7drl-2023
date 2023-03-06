@@ -19,6 +19,7 @@ pub mod monster;
 pub mod player;
 pub mod raws;
 pub mod tile_contents;
+pub mod ui;
 pub mod viewer_look;
 pub mod window;
 
@@ -49,9 +50,8 @@ impl State {
     fn render(&self, ctx: &mut BTerm) {
         ctx.cls();
         map::draw_map(self, ctx);
-        for (i, message) in self.messages.current_messages.iter().rev().enumerate() {
-            ctx.print(0, self.size.y - 1 - i as i32, message);
-        }
+        ui::draw_messages(self, ctx);
+        ui::draw_side_info(self, ctx);
         match &self.window {
             Window::None => {}
             Window::Inventory { window } => {
