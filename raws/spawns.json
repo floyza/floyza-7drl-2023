@@ -1,0 +1,22 @@
+{
+  "monsters": [
+    [
+      { "Name": "Orc" },
+      {
+        "Health": { "max_hp": 30 }
+      },
+      { "Attack": { "damage": 10 } },
+      { "Viewer": { "range": 8 } },
+      { "Blocker": {} },
+      {
+        "Renderable": {
+          "glyph": "o",
+          "fg": "#00bfff",
+          "bg": "#000000",
+          "layer": 1
+        }
+      }
+    ]
+  ],
+  "items": []
+}

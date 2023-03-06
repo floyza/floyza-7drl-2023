@@ -80,6 +80,7 @@ source = "git+https://github.com/amethyst/bracket-lib.git?rev=0d2d5e6a9a8e7c7ae3
 dependencies = [
  "lazy_static",
  "parking_lot 0.12.1",
+ "serde",
 ]
 
 [[package]]
@@ -96,6 +97,7 @@ name = "bracket-geometry"
 version = "0.8.7"
 source = "git+https://github.com/amethyst/bracket-lib.git?rev=0d2d5e6a9a8e7c7ae3710cfef85be4cab0109a27#0d2d5e6a9a8e7c7ae3710cfef85be4cab0109a27"
 dependencies = [
+ "serde",
  "ultraviolet",
 ]
 
@@ -143,6 +145,7 @@ dependencies = [
  "rand",
  "rand_xorshift",
  "regex",
+ "serde",
  "wasm-bindgen",
 ]
 
@@ -546,6 +549,8 @@ version = "0.1.0"
 dependencies = [
  "bracket-lib",
  "hecs",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -739,6 +744,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f6530b5d25416ece146739e6130f7f7e39f9ee3435236be32b6774f548d76aac"
 dependencies = [
  "hashbrown",
+ "serde",
  "spin",
 ]
 
@@ -784,6 +790,12 @@ dependencies = [
  "wasm-bindgen",
  "web-sys",
 ]
+
+[[package]]
+name = "itoa"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "453ad9f582a441959e5f0d088b02ce04cfe8d51a8eaf077f12ac6d3e94164ca6"
 
 [[package]]
 name = "jni-sys"
@@ -1268,6 +1280,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d25bf25ec5ae4a3f1b92f929810509a2f53d7dca2f50b794ff57e3face536c8f"
 dependencies = [
  "rand_core",
+ "serde",
 ]
 
 [[package]]
@@ -1313,6 +1326,12 @@ name = "regex-syntax"
 version = "0.6.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
+
+[[package]]
+name = "ryu"
+version = "1.0.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f91339c0467de62360649f8d3e185ca8de4224ff281f66000de5eb2a77a79041"
 
 [[package]]
 name = "safe_arch"
@@ -1367,6 +1386,9 @@ name = "serde"
 version = "1.0.152"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb7d1f0d3021d347a83e556fc4683dea2ea09d87bccdf88ff5c12545d89d5efb"
+dependencies = [
+ "serde_derive",
+]
 
 [[package]]
 name = "serde_derive"
@@ -1377,6 +1399,17 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "serde_json"
+version = "1.0.94"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c533a59c9d8a93a09c6ab31f0fd5e5f4dd1b8fc9434804029839884765d04ea"
+dependencies = [
+ "itoa",
+ "ryu",
+ "serde",
 ]
 
 [[package]]

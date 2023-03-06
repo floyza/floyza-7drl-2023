@@ -11,10 +11,12 @@ use ui::UI;
 pub mod blockers;
 pub mod commands;
 pub mod components;
+pub mod components_serde;
 pub mod map;
 pub mod messages;
 pub mod monster;
 pub mod player;
+pub mod raws;
 pub mod tile_contents;
 pub mod ui;
 pub mod viewer_look;
@@ -106,6 +108,8 @@ impl GameState for State {
 }
 
 fn main() -> BError {
+    raws::load_raws();
+
     let mut world = World::new();
     let map = map::Map::new();
     let player_pos = map.rooms[0].center();
