@@ -15,7 +15,7 @@ pub fn monster_act(state: &mut State, entity: Entity) {
             &Name,
             &mut Monster,
             Option<&mut Viewer>,
-            &Attack,
+            Option<&Attack>,
             &mut Position,
         )>(entity)
         .unwrap();
@@ -37,15 +37,17 @@ pub fn monster_act(state: &mut State, entity: Entity) {
         let step_idx = path.steps[1];
         let pt = state.map.index_to_point2d(step_idx);
         if pt == player_pos {
-            let damage = attack.damage;
-            state
-                .messages
-                .enqueue_message(&format!("The {} hits you for {} damage.", name.0, damage));
-            let player_hp = state
-                .ecs
-                .query_one_mut::<&mut Health>(state.player_entity)
-                .unwrap();
-            player_hp.hp -= damage;
+            if let Some(attack) = attack {
+                let damage = attack.damage;
+                state
+                    .messages
+                    .enqueue_message(&format!("The {} hits you for {} damage.", name.0, damage));
+                let player_hp = state
+                    .ecs
+                    .query_one_mut::<&mut Health>(state.player_entity)
+                    .unwrap();
+                player_hp.hp -= damage;
+            }
         } else {
             pos.0 = pt;
             if Some(pt) == mon.tracking {

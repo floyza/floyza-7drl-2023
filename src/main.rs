@@ -6,9 +6,9 @@ use hecs::{Entity, World};
 use map::{item_fill_map, populate_map};
 use messages::MessageLog;
 use monster::monster_act;
+use systems::*;
 use window::Window;
 
-pub mod blockers;
 pub mod commands;
 pub mod components;
 pub mod components_serde;
@@ -18,9 +18,8 @@ pub mod messages;
 pub mod monster;
 pub mod player;
 pub mod raws;
-pub mod tile_contents;
+pub mod systems;
 pub mod ui;
-pub mod viewer_look;
 pub mod window;
 
 pub struct State {
@@ -43,6 +42,7 @@ pub enum OperatingMode {
 
 impl State {
     fn run_systems(&mut self) {
+        death::system_kill_dead(self);
         blockers::system_calc_blockers(self);
         tile_contents::system_tile_contents(self);
         viewer_look::system_calc_viewpoints(self);
@@ -126,7 +126,7 @@ fn main() -> BError {
     let map = map::Map::new();
     let player_pos = map.rooms[0].center();
     let player_entity = world.spawn((
-        Health { max_hp: 30, hp: 30 },
+        Health { max_hp: 80, hp: 80 },
         Position(player_pos),
         Player {},
         Viewer {
