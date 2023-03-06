@@ -50,8 +50,10 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
                 if let Ok(viewer) = state.ecs.query_one_mut::<&mut Viewer>(state.player_entity) {
                     viewer.dirty = true;
                 }
+                true
+            } else {
+                false
             }
-            true
         }
         Some(Command::Grab) => {
             let position = state
