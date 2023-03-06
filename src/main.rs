@@ -6,7 +6,7 @@ use hecs::{Entity, World};
 use map::{item_fill_map, populate_map};
 use messages::MessageLog;
 use monster::monster_act;
-use ui::UI;
+use window::Window;
 
 pub mod blockers;
 pub mod commands;
@@ -19,8 +19,8 @@ pub mod monster;
 pub mod player;
 pub mod raws;
 pub mod tile_contents;
-pub mod ui;
 pub mod viewer_look;
+pub mod window;
 
 pub struct State {
     pub size: Point,
@@ -30,7 +30,7 @@ pub struct State {
     pub rng: RandomNumberGenerator,
     pub messages: MessageLog,
     pub has_moved: bool,
-    pub ui: ui::UI,
+    pub window: window::Window,
     pub turn_order: VecDeque<Entity>,
     pub operating_mode: OperatingMode,
 }
@@ -52,10 +52,10 @@ impl State {
         for (i, message) in self.messages.current_messages.iter().rev().enumerate() {
             ctx.print(0, self.size.y - 1 - i as i32, message);
         }
-        match &self.ui {
-            UI::Playing => {}
-            UI::Inventory { ui } => {
-                ui.render(self, ctx);
+        match &self.window {
+            Window::None => {}
+            Window::Inventory { window } => {
+                window.render(self, ctx);
             }
         }
     }
@@ -86,8 +86,8 @@ impl GameState for State {
                 }
                 OperatingMode::WaitingForInput => {
                     if let Some(key) = ctx.key.take() {
-                        match &mut self.ui {
-                            UI::Playing => {
+                        match &mut self.window {
+                            Window::None => {
                                 let player_used_turn = player::player_act(self, key);
                                 if player_used_turn {
                                     self.turn_order.rotate_left(1);
@@ -95,9 +95,9 @@ impl GameState for State {
                                 }
                                 self.run_systems();
                             }
-                            UI::Inventory { ui } => {
-                                if ui.update(key) {
-                                    self.ui = UI::Playing;
+                            Window::Inventory { window } => {
+                                if window.update(key) {
+                                    self.window = Window::None;
                                 }
                             }
                         }
@@ -174,7 +174,7 @@ fn main() -> BError {
             current_messages: Vec::new(),
         },
         has_moved: false,
-        ui: UI::Playing,
+        window: Window::None,
         turn_order: VecDeque::new(),
         operating_mode: OperatingMode::Ticking,
     };

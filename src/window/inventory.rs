@@ -2,12 +2,12 @@ use bracket_lib::prelude::*;
 
 use crate::{components::*, State};
 
-pub struct InventoryUI {
+pub struct InventoryWindow {
     pub selection: u32,
     pub length: u32,
 }
 
-impl InventoryUI {
+impl InventoryWindow {
     pub fn render(&self, state: &State, ctx: &mut BTerm) {
         let x = 5;
         let y = 5;

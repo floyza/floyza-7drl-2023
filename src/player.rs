@@ -3,7 +3,7 @@ use bracket_lib::prelude::*;
 use crate::{
     commands::Command,
     components::*,
-    ui::{inventory_ui::InventoryUI, UI},
+    window::{inventory::InventoryWindow, Window},
     State,
 };
 
@@ -95,8 +95,8 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
                 .ecs
                 .query_one_mut::<&mut Inventory>(state.player_entity)
                 .unwrap();
-            state.ui = UI::Inventory {
-                ui: InventoryUI {
+            state.window = Window::Inventory {
+                window: InventoryWindow {
                     selection: 0,
                     length: inv.contents.len() as u32,
                 },
