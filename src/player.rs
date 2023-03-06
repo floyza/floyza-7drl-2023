@@ -35,6 +35,7 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
         }),
         VirtualKeyCode::G => Some(Command::Grab),
         VirtualKeyCode::I => Some(Command::OpenInventory),
+        VirtualKeyCode::Period => Some(Command::Wait),
         _ => None,
     };
     match act {
@@ -102,6 +103,7 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
             };
             false
         }
+        Some(Command::Wait) => true,
         None => false,
     }
 }
