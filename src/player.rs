@@ -3,7 +3,7 @@ use bracket_lib::prelude::*;
 use crate::{
     commands::Command,
     components::*,
-    window::{inventory::InventoryWindow, Window},
+    window::{inventory::InventoryWindow, message_log::MessageLogWindow, Window},
     State,
 };
 
@@ -35,6 +35,7 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
         }),
         VirtualKeyCode::G => Some(Command::Grab),
         VirtualKeyCode::I => Some(Command::OpenInventory),
+        VirtualKeyCode::M => Some(Command::OpenMessageLog),
         VirtualKeyCode::Period => Some(Command::Wait),
         _ => None,
     };
@@ -100,6 +101,12 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
                     selection: 0,
                     length: inv.contents.len() as u32,
                 },
+            };
+            false
+        }
+        Some(Command::OpenMessageLog) => {
+            state.window = Window::MessageLog {
+                window: MessageLogWindow {},
             };
             false
         }

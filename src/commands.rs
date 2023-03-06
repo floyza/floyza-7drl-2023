@@ -4,5 +4,6 @@ pub enum Command {
     Move { target: Point },
     Grab,
     OpenInventory,
+    OpenMessageLog,
     Wait,
 }

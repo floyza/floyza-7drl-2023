@@ -57,6 +57,9 @@ impl State {
             Window::Inventory { window } => {
                 window.render(self, ctx);
             }
+            Window::MessageLog { window } => {
+                window.render(self, ctx);
+            }
         }
     }
 }
@@ -96,6 +99,11 @@ impl GameState for State {
                                 self.run_systems();
                             }
                             Window::Inventory { window } => {
+                                if window.update(key) {
+                                    self.window = Window::None;
+                                }
+                            }
+                            Window::MessageLog { window } => {
                                 if window.update(key) {
                                     self.window = Window::None;
                                 }
