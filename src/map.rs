@@ -185,6 +185,30 @@ pub fn populate_map(state: &mut State) {
     }
 }
 
+pub fn item_fill_map(state: &mut State) {
+    let mut new_items: Vec<Point> = Vec::new();
+    let mut count = 0;
+    loop {
+        let room_idx = state.rng.range(0, state.map.rooms.len());
+        let room = state.map.rooms[room_idx];
+        assert!(room.x1 <= room.x2);
+        assert!(room.y1 <= room.y2);
+        let item_x = state.rng.range(room.x1, room.x2);
+        let item_y = state.rng.range(room.y1, room.y2);
+        let pt = Point::new(item_x, item_y);
+        if !new_items.contains(&pt) {
+            new_items.push(pt);
+            count += 1;
+            if count > 10 {
+                break;
+            }
+        }
+    }
+    for pt in new_items {
+        crate::item::spawn_item(state, pt);
+    }
+}
+
 pub fn draw_map(state: &State, ctx: &mut BTerm) {
     let mut y = 0;
     let mut x = 0;

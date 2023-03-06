@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use bracket_lib::prelude::*;
 use components::*;
 use hecs::{Entity, World};
-use map::populate_map;
+use map::{item_fill_map, populate_map};
 use messages::MessageLog;
 use monster::monster_act;
 use ui::UI;
@@ -12,6 +12,7 @@ pub mod blockers;
 pub mod commands;
 pub mod components;
 pub mod components_serde;
+pub mod item;
 pub mod map;
 pub mod messages;
 pub mod monster;
@@ -22,6 +23,7 @@ pub mod ui;
 pub mod viewer_look;
 
 pub struct State {
+    pub size: Point,
     pub ecs: World,
     pub map: map::Map,
     pub player_entity: Entity,
@@ -43,11 +45,13 @@ impl State {
         blockers::system_calc_blockers(self);
         tile_contents::system_tile_contents(self);
         viewer_look::system_calc_viewpoints(self);
-        messages::handle_messages(self); // HMM TODO
     }
     fn render(&self, ctx: &mut BTerm) {
         ctx.cls();
         map::draw_map(self, ctx);
+        for (i, message) in self.messages.current_messages.iter().rev().enumerate() {
+            ctx.print(0, self.size.y - 1 - i as i32, message);
+        }
         match &self.ui {
             UI::Playing => {}
             UI::Inventory { ui } => {
@@ -160,13 +164,14 @@ fn main() -> BError {
     ));
 
     let mut state = State {
+        size: Point::new(80, 50),
         ecs: world,
         map,
         player_entity,
         rng: RandomNumberGenerator::new(),
         messages: MessageLog {
             log: Vec::new(),
-            queue: Vec::new(),
+            current_messages: Vec::new(),
         },
         has_moved: false,
         ui: UI::Playing,
@@ -177,6 +182,7 @@ fn main() -> BError {
     state.turn_order.push_back(player_entity);
 
     populate_map(&mut state);
+    item_fill_map(&mut state);
 
     let context = BTermBuilder::simple80x50()
         .with_title("Be what you sow")

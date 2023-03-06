@@ -18,5 +18,17 @@
       }
     ]
   ],
-  "items": []
+  "items": [
+    [
+      { "Name": "Seed of Power" },
+      {
+        "Renderable": {
+          "glyph": "*",
+          "fg": "#22ff22",
+          "bg": "#000000",
+          "layer": 0
+        }
+      }
+    ]
+  ]
 }
