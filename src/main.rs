@@ -145,6 +145,7 @@ fn main() -> BError {
         },
         Name("Bob".to_string()),
         Grower::Empty,
+        Attack { damage: 10 },
     ));
 
     // generate some simple stuff for testing

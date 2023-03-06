@@ -1,4 +1,5 @@
 use bracket_lib::prelude::*;
+use hecs::With;
 
 use crate::{
     commands::Command,
@@ -43,11 +44,36 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
         Some(Command::Move { target: move_pt }) => {
             let position = state
                 .ecs
-                .query_one_mut::<&mut Position>(state.player_entity)
-                .unwrap();
+                .query_one_mut::<&Position>(state.player_entity)
+                .unwrap()
+                .clone();
             let new_pt = position.0 + move_pt;
             let new_idx = state.map.point2d_to_index(new_pt);
+
+            if let Ok(attacker) = state
+                .ecs
+                .query_one_mut::<&Attack>(state.player_entity)
+                .cloned()
+            {
+                for entity in state.map.tile_contents[new_idx].iter() {
+                    if let Ok((health, name)) = state
+                        .ecs
+                        .query_one_mut::<With<(&mut Health, &Name), &Monster>>(*entity)
+                    {
+                        state.messages.enqueue_message(&format!(
+                            "You hit the {} for {} damage.",
+                            name.0, attacker.damage
+                        ));
+                        health.hp -= attacker.damage;
+                        return true;
+                    }
+                }
+            }
             if state.map.is_available_exit(new_idx) {
+                let position = state
+                    .ecs
+                    .query_one_mut::<&mut Position>(state.player_entity)
+                    .unwrap();
                 position.0 = new_pt;
                 if let Ok(viewer) = state.ecs.query_one_mut::<&mut Viewer>(state.player_entity) {
                     viewer.dirty = true;
