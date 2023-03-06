@@ -9,22 +9,21 @@ pub fn monster_act(state: &mut State, entity: Entity) {
         .unwrap()
         .0
         .clone();
+    let (mon, viewer, pos) = state
+        .ecs
+        .query_one_mut::<(&mut Monster, Option<&mut Viewer>, &mut Position)>(entity)
+        .unwrap();
     let mut target = None;
-    if let Ok(viewer) = state.ecs.query_one_mut::<&Viewer>(entity) {
+    if let Some(viewer) = viewer.as_ref() {
         if viewer.visible_tiles.contains(&player_pos) {
             target = Some(player_pos);
-            if let Ok(mon) = state.ecs.query_one_mut::<&mut Monster>(entity) {
-                mon.tracking = target;
-            }
+            mon.tracking = target;
         }
     }
     if target == None {
-        if let Ok(mon) = state.ecs.query_one_mut::<&Monster>(entity) {
-            target = mon.tracking;
-        }
+        target = mon.tracking;
     }
     let Some(target) = target else { return };
-    let pos = state.ecs.query_one_mut::<&mut Position>(entity).unwrap();
     let start = state.map.point2d_to_index(pos.0);
     let end = state.map.point2d_to_index(target);
     let path = a_star_search(start, end, &state.map);
@@ -35,12 +34,10 @@ pub fn monster_act(state: &mut State, entity: Entity) {
             // do attack
         } else {
             pos.0 = pt;
-            if let Ok(mon) = state.ecs.query_one_mut::<&mut Monster>(entity) {
-                if Some(pt) == mon.tracking {
-                    mon.tracking = None;
-                }
+            if Some(pt) == mon.tracking {
+                mon.tracking = None;
             }
-            if let Ok(viewer) = state.ecs.query_one_mut::<&mut Viewer>(entity) {
+            if let Some(viewer) = viewer {
                 viewer.dirty = true;
             }
         }
