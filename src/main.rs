@@ -8,6 +8,7 @@ use messages::MessageLog;
 use monster::monster_act;
 use ui::UI;
 
+pub mod blockers;
 pub mod commands;
 pub mod components;
 pub mod map;
@@ -37,6 +38,7 @@ pub enum OperatingMode {
 
 impl State {
     fn run_systems(&mut self) {
+        blockers::system_calc_blockers(self);
         tile_contents::system_tile_contents(self);
         viewer_look::system_calc_viewpoints(self);
         messages::handle_messages(self); // HMM TODO

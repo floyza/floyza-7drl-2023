@@ -49,3 +49,6 @@ pub enum Grower {
     Growing { seed: Entity, num_left: u32 },
     Empty,
 }
+
+#[derive(Debug)]
+pub struct Blocker {}

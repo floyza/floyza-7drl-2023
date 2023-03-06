@@ -71,6 +71,7 @@ mod spawners {
                 bg: RGB::named(BLACK),
                 layer: 1,
             },
+            Blocker {},
         ))
     }
 }

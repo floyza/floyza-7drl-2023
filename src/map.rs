@@ -19,6 +19,7 @@ pub struct Map {
     pub rooms: Vec<Rect>,
     pub visible_tiles: Vec<bool>,
     pub revealed_tiles: Vec<bool>,
+    pub blocked_tiles: Vec<bool>,
     pub tile_contents: Vec<Vec<Entity>>,
 }
 
@@ -78,6 +79,7 @@ impl Map {
             height: 50,
             visible_tiles: vec![false; 80 * 50],
             revealed_tiles: vec![false; 80 * 50],
+            blocked_tiles: vec![false; 80 * 50],
             tile_contents: vec![Vec::new(); 80 * 50],
         };
 
@@ -152,7 +154,7 @@ impl Map {
     }
 
     pub fn is_available_exit(&self, i: usize) -> bool {
-        self.in_bounds(self.index_to_point2d(i)) && !(self.tiles[i] == Tile::Wall)
+        self.in_bounds(self.index_to_point2d(i)) && !self.blocked_tiles[i]
     }
 }
 
