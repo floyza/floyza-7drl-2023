@@ -2,7 +2,7 @@ use crate::components::*;
 use hecs::{Entity, NoSuchEntity, World};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum Component {
     Health(Health),
     Attack(Attack),

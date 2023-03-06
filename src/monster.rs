@@ -1,6 +1,6 @@
-use crate::{components::*, State};
+use crate::{components::*, raws::RAWS, State};
 use bracket_lib::prelude::*;
-use hecs::{Entity, World};
+use hecs::Entity;
 
 pub fn monster_act(state: &mut State, entity: Entity) {
     let player_pos = state
@@ -47,31 +47,18 @@ pub fn monster_act(state: &mut State, entity: Entity) {
     }
 }
 
-pub fn spawn_monster(ecs: &mut World, pos: Point) -> Entity {
-    spawners::orc(ecs, pos)
-}
-
-mod spawners {
-    use super::*;
-
-    pub fn orc(ecs: &mut World, pos: Point) -> Entity {
-        ecs.spawn((
-            Name("Orc".to_owned()),
-            Monster { tracking: None },
-            Viewer {
-                visible_tiles: Vec::new(),
-                range: 8,
-                dirty: true,
-            },
-            Health { hp: 30, max_hp: 30 },
-            Position(pos),
-            Renderable {
-                glyph: to_cp437('o'),
-                fg: RGB::named(GREEN),
-                bg: RGB::named(BLACK),
-                layer: 1,
-            },
-            Blocker {},
-        ))
+pub fn spawn_monster(state: &mut State, pos: Point) -> Entity {
+    let entity = state.ecs.spawn(());
+    {
+        let raws = RAWS.lock().unwrap();
+        let monster_of_choice = state.rng.range(0, raws.monsters.len());
+        for component in raws.monsters[monster_of_choice].iter() {
+            component.clone().insert(&mut state.ecs, entity).unwrap();
+        }
     }
+    state
+        .ecs
+        .insert(entity, (Monster { tracking: None }, Position(pos)))
+        .unwrap();
+    return entity;
 }

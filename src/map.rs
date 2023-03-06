@@ -180,7 +180,7 @@ pub fn populate_map(state: &mut State) {
         }
     }
     for pt in new_monsters {
-        let entity = crate::monster::spawn_monster(&mut state.ecs, pt);
+        let entity = crate::monster::spawn_monster(state, pt);
         state.turn_order.push_back(entity);
     }
 }
