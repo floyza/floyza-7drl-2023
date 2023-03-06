@@ -39,15 +39,17 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
     };
     match act {
         Some(Command::Move { target: move_pt }) => {
-            let (position, viewer) = state
+            let position = state
                 .ecs
-                .query_one_mut::<(&mut Position, &mut Viewer)>(state.player_entity)
+                .query_one_mut::<&mut Position>(state.player_entity)
                 .unwrap();
             let new_pt = position.0 + move_pt;
             let new_idx = state.map.point2d_to_index(new_pt);
             if state.map.is_available_exit(new_idx) {
                 position.0 = new_pt;
-                viewer.dirty = true;
+                if let Ok(viewer) = state.ecs.query_one_mut::<&mut Viewer>(state.player_entity) {
+                    viewer.dirty = true;
+                }
             }
             true
         }
@@ -86,8 +88,15 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
             }
         }
         Some(Command::OpenInventory) => {
+            let inv = state
+                .ecs
+                .query_one_mut::<&mut Inventory>(state.player_entity)
+                .unwrap();
             state.ui = UI::Inventory {
-                ui: InventoryUI { selection: 0 },
+                ui: InventoryUI {
+                    selection: 0,
+                    length: inv.contents.len() as u32,
+                },
             };
             false
         }

@@ -3,7 +3,8 @@ use bracket_lib::prelude::*;
 use crate::{components::*, State};
 
 pub struct InventoryUI {
-    pub selection: i32,
+    pub selection: u32,
+    pub length: u32,
 }
 
 impl InventoryUI {
@@ -26,7 +27,7 @@ impl InventoryUI {
                 .map(|n| n.0.clone())
                 .unwrap_or("UNNAMED_OBJECT".to_string());
             let line = y + 1 + idx;
-            if self.selection == idx as i32 {
+            if self.selection == idx as u32 {
                 ctx.set(
                     x + 1,
                     line,
@@ -45,5 +46,26 @@ impl InventoryUI {
             }
             ctx.print(x + 2, line, name);
         }
+    }
+
+    /// Returns `true` if we are done with this window
+    pub fn update(&mut self, key: VirtualKeyCode) -> bool {
+        match key {
+            VirtualKeyCode::K | VirtualKeyCode::Up => {
+                if self.selection > 0 {
+                    self.selection -= 1;
+                }
+            }
+            VirtualKeyCode::J | VirtualKeyCode::Down => {
+                if self.selection < self.length - 1 {
+                    self.selection += 1;
+                }
+            }
+            VirtualKeyCode::Escape | VirtualKeyCode::Q => {
+                return true;
+            }
+            _ => {}
+        }
+        return false;
     }
 }

@@ -1,13 +1,18 @@
+use std::collections::VecDeque;
+
 use bracket_lib::prelude::*;
 use components::*;
 use hecs::{Entity, World};
+use map::populate_map;
 use messages::MessageLog;
+use monster::monster_act;
 use ui::UI;
 
 pub mod commands;
 pub mod components;
 pub mod map;
 pub mod messages;
+pub mod monster;
 pub mod player;
 pub mod tile_contents;
 pub mod ui;
@@ -21,6 +26,13 @@ pub struct State {
     pub messages: MessageLog,
     pub has_moved: bool,
     pub ui: ui::UI,
+    pub turn_order: VecDeque<Entity>,
+    pub operating_mode: OperatingMode,
+}
+
+pub enum OperatingMode {
+    WaitingForInput,
+    Ticking,
 }
 
 impl State {
@@ -48,38 +60,46 @@ impl GameState for State {
             self.run_systems();
             self.render(ctx);
         }
-        if let Some(key) = ctx.key {
-            match &mut self.ui {
-                UI::Playing => {
-                    let player_used_turn = player::player_act(self, key);
-                    if player_used_turn { /* monsters act here */ }
-                    self.run_systems();
-                    self.render(ctx);
-                }
-                UI::Inventory { ui } => {
-                    let inventory = self
-                        .ecs
-                        .query_one_mut::<&Inventory>(self.player_entity)
-                        .unwrap();
-                    match key {
-                        VirtualKeyCode::K | VirtualKeyCode::Up => {
-                            ui.selection = std::cmp::max(0, ui.selection - 1);
+        loop {
+            match self.operating_mode {
+                OperatingMode::Ticking => {
+                    let turn = self.turn_order.front();
+                    if let Some(turn) = turn {
+                        if self.ecs.satisfies::<&Player>(*turn).unwrap() {
+                            self.operating_mode = OperatingMode::WaitingForInput;
+                        } else if self.ecs.satisfies::<&Monster>(*turn).unwrap() {
+                            monster_act(self, *turn);
+                            self.run_systems();
+                            self.turn_order.rotate_left(1);
+                        } else {
+                            panic!("Non-actor in the actor queue");
                         }
-                        VirtualKeyCode::J | VirtualKeyCode::Down => {
-                            ui.selection = std::cmp::min(
-                                inventory.contents.len() as i32 - 1,
-                                ui.selection + 1,
-                            );
-                        }
-                        VirtualKeyCode::Escape | VirtualKeyCode::Q => {
-                            self.ui = UI::Playing;
-                        }
-                        _ => {}
                     }
-                    self.render(ctx);
+                }
+                OperatingMode::WaitingForInput => {
+                    if let Some(key) = ctx.key.take() {
+                        match &mut self.ui {
+                            UI::Playing => {
+                                let player_used_turn = player::player_act(self, key);
+                                if player_used_turn {
+                                    self.turn_order.rotate_left(1);
+                                    self.operating_mode = OperatingMode::Ticking;
+                                }
+                                self.run_systems();
+                            }
+                            UI::Inventory { ui } => {
+                                if ui.update(key) {
+                                    self.ui = UI::Playing;
+                                }
+                            }
+                        }
+                    } else {
+                        break;
+                    }
                 }
             }
         }
+        self.render(ctx);
     }
 }
 
@@ -88,7 +108,7 @@ fn main() -> BError {
     let map = map::Map::new();
     let player_pos = map.rooms[0].center();
     let player_entity = world.spawn((
-        Health(30),
+        Health { max_hp: 30, hp: 30 },
         Position(player_pos),
         Player {},
         Viewer {
@@ -133,7 +153,7 @@ fn main() -> BError {
         Name("Potion of Blueness".to_string()),
     ));
 
-    let state = State {
+    let mut state = State {
         ecs: world,
         map,
         player_entity,
@@ -144,7 +164,13 @@ fn main() -> BError {
         },
         has_moved: false,
         ui: UI::Playing,
+        turn_order: VecDeque::new(),
+        operating_mode: OperatingMode::Ticking,
     };
+
+    state.turn_order.push_back(player_entity);
+
+    populate_map(&mut state);
 
     let context = BTermBuilder::simple80x50()
         .with_title("Be what you sow")

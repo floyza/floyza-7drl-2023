@@ -2,7 +2,10 @@ use bracket_lib::prelude::*;
 use hecs::Entity;
 
 #[derive(Debug)]
-pub struct Health(pub i32);
+pub struct Health {
+    pub hp: i32,
+    pub max_hp: i32,
+}
 
 #[derive(Debug)]
 pub struct Position(pub Point);
@@ -26,7 +29,9 @@ pub struct Viewer {
 pub struct Player {}
 
 #[derive(Debug)]
-pub struct Monster {}
+pub struct Monster {
+    pub tracking: Option<Point>,
+}
 
 #[derive(Debug)]
 pub struct Item {}

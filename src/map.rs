@@ -19,7 +19,7 @@ pub struct Map {
     pub rooms: Vec<Rect>,
     pub visible_tiles: Vec<bool>,
     pub revealed_tiles: Vec<bool>,
-    pub tile_contents: Vec<Vec<Entity>>, // TODO update this
+    pub tile_contents: Vec<Vec<Entity>>,
 }
 
 impl Algorithm2D for Map {
@@ -157,7 +157,28 @@ impl Map {
 }
 
 pub fn populate_map(state: &mut State) {
-    // let mut new_monsters: Vec<Point> = Vec::new();
+    let mut new_monsters: Vec<Point> = Vec::new();
+    let mut count = 0;
+    loop {
+        let room_idx = state.rng.range(0, state.map.rooms.len());
+        let room = state.map.rooms[room_idx];
+        assert!(room.x1 <= room.x2);
+        assert!(room.y1 <= room.y2);
+        let monster_x = state.rng.range(room.x1, room.x2);
+        let monster_y = state.rng.range(room.y1, room.y2);
+        let pt = Point::new(monster_x, monster_y);
+        if !new_monsters.contains(&pt) {
+            new_monsters.push(pt);
+            count += 1;
+            if count > 20 {
+                break;
+            }
+        }
+    }
+    for pt in new_monsters {
+        let entity = crate::monster::spawn_monster(&mut state.ecs, pt);
+        state.turn_order.push_back(entity);
+    }
 }
 
 pub fn draw_map(state: &State, ctx: &mut BTerm) {
