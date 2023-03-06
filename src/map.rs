@@ -45,18 +45,20 @@ impl BaseMap for Map {
     fn get_available_exits(&self, i: usize) -> SmallVec<[(usize, f32); 10]> {
         let mut vec = SmallVec::<[(usize, f32); 10]>::new();
         let Point { x, y } = self.index_to_point2d(i);
+        for (new_x, new_y) in [(x - 1, y), (x, y - 1), (x + 1, y), (x, y + 1)] {
+            if self.is_available_exit(self.point2d_to_index(Point::new(new_x, new_y))) {
+                let cost = 1.0;
+                vec.push((self.point2d_to_index(Point::new(new_x, new_y)), cost));
+            }
+        }
         for (new_x, new_y) in [
             (x - 1, y - 1),
-            (x - 1, y),
             (x - 1, y + 1),
-            (x, y - 1),
-            (x, y + 1),
             (x + 1, y - 1),
-            (x + 1, y),
             (x + 1, y + 1),
         ] {
             if self.is_available_exit(self.point2d_to_index(Point::new(new_x, new_y))) {
-                let cost = 1.0;
+                let cost = 1.4;
                 vec.push((self.point2d_to_index(Point::new(new_x, new_y)), cost));
             }
         }
