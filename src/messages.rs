@@ -1,5 +1,3 @@
-use crate::State;
-
 pub struct MessageLog {
     pub log: Vec<String>,
     pub current_messages: Vec<String>,

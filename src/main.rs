@@ -7,7 +7,6 @@ use map::{item_fill_map, populate_map};
 use messages::MessageLog;
 use monster::monster_act;
 use systems::*;
-use window::Window;
 
 pub mod commands;
 pub mod components;
@@ -20,7 +19,6 @@ pub mod player;
 pub mod raws;
 pub mod systems;
 pub mod ui;
-pub mod window;
 
 pub struct State {
     pub size: Point,
@@ -30,7 +28,6 @@ pub struct State {
     pub rng: RandomNumberGenerator,
     pub messages: MessageLog,
     pub has_moved: bool,
-    pub window: window::Window,
     pub turn_order: VecDeque<Entity>,
     pub operating_mode: OperatingMode,
 }
@@ -38,6 +35,8 @@ pub struct State {
 pub enum OperatingMode {
     WaitingForInput,
     Ticking,
+    OpenInventory(ui::InvUIState),
+    OpenMessageLog,
 }
 
 impl State {
@@ -52,14 +51,10 @@ impl State {
         map::draw_map(self, ctx);
         ui::draw_messages(self, ctx);
         ui::draw_side_info(self, ctx);
-        match &self.window {
-            Window::None => {}
-            Window::Inventory { window } => {
-                window.render(self, ctx);
-            }
-            Window::MessageLog { window } => {
-                window.render(self, ctx);
-            }
+        match &self.operating_mode {
+            OperatingMode::OpenInventory(s) => ui::draw_inventory_ui(s, self, ctx),
+            OperatingMode::OpenMessageLog => ui::draw_message_log(self, ctx),
+            _ => {}
         }
     }
 }
@@ -72,7 +67,7 @@ impl GameState for State {
             self.render(ctx);
         }
         loop {
-            match self.operating_mode {
+            match &self.operating_mode {
                 OperatingMode::Ticking => {
                     let turn = self.turn_order.front();
                     if let Some(turn) = turn {
@@ -89,25 +84,32 @@ impl GameState for State {
                 }
                 OperatingMode::WaitingForInput => {
                     if let Some(key) = ctx.key.take() {
-                        match &mut self.window {
-                            Window::None => {
-                                let player_used_turn = player::player_act(self, key);
-                                if player_used_turn {
-                                    self.turn_order.rotate_left(1);
-                                    self.operating_mode = OperatingMode::Ticking;
-                                }
-                                self.run_systems();
-                            }
-                            Window::Inventory { window } => {
-                                if window.update(key) {
-                                    self.window = Window::None;
-                                }
-                            }
-                            Window::MessageLog { window } => {
-                                if window.update(key) {
-                                    self.window = Window::None;
-                                }
-                            }
+                        let player_used_turn = player::player_act(self, key);
+                        if player_used_turn {
+                            self.turn_order.rotate_left(1);
+                            self.operating_mode = OperatingMode::Ticking;
+                        }
+                        self.run_systems();
+                    } else {
+                        break;
+                    }
+                }
+                OperatingMode::OpenInventory(s) => {
+                    if let Some(key) = ctx.key.take() {
+                        let (done, s) = ui::update_inventory_ui(s.clone(), key);
+                        if done {
+                            self.operating_mode = OperatingMode::Ticking;
+                        } else {
+                            self.operating_mode = OperatingMode::OpenInventory(s);
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                OperatingMode::OpenMessageLog => {
+                    if let Some(key) = ctx.key.take() {
+                        if ui::update_message_log(key) {
+                            self.operating_mode = OperatingMode::Ticking;
                         }
                     } else {
                         break;
@@ -183,7 +185,6 @@ fn main() -> BError {
             current_messages: Vec::new(),
         },
         has_moved: false,
-        window: Window::None,
         turn_order: VecDeque::new(),
         operating_mode: OperatingMode::Ticking,
     };

@@ -1,12 +1,7 @@
 use bracket_lib::prelude::*;
 use hecs::With;
 
-use crate::{
-    commands::Command,
-    components::*,
-    window::{inventory::InventoryWindow, message_log::MessageLogWindow, Window},
-    State,
-};
+use crate::{commands::Command, components::*, ui, OperatingMode, State};
 
 pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
     let act: Option<Command> = match key {
@@ -122,18 +117,14 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
                 .ecs
                 .query_one_mut::<&mut Inventory>(state.player_entity)
                 .unwrap();
-            state.window = Window::Inventory {
-                window: InventoryWindow {
-                    selection: 0,
-                    length: inv.contents.len() as u32,
-                },
-            };
+            state.operating_mode = OperatingMode::OpenInventory(ui::InvUIState {
+                selection: 0,
+                length: inv.contents.len() as u32,
+            });
             false
         }
         Some(Command::OpenMessageLog) => {
-            state.window = Window::MessageLog {
-                window: MessageLogWindow {},
-            };
+            state.operating_mode = OperatingMode::OpenMessageLog;
             false
         }
         Some(Command::Wait) => true,
