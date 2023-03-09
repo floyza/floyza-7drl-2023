@@ -16,6 +16,28 @@
           "layer": 1
         }
       }
+    ],
+    [
+      { "Name": "Orc Archer" },
+      {
+        "Health": { "max_hp": 20 }
+      },
+      { "Attack": { "damage": 8 } },
+      { "Viewer": { "range": 8 } },
+      { "Blocker": {} },
+      {
+        "Renderable": {
+          "glyph": "o",
+          "fg": "#ffbf00",
+          "bg": "#000000",
+          "layer": 1
+        }
+      },
+      {
+        "Skilled": {
+          "skills": ["ShootBow"]
+        }
+      }
     ]
   ],
   "items": [

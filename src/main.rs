@@ -17,6 +17,7 @@ pub mod messages;
 pub mod monster;
 pub mod player;
 pub mod raws;
+pub mod skill;
 pub mod systems;
 pub mod ui;
 

@@ -2,6 +2,8 @@ use bracket_lib::prelude::*;
 use hecs::Entity;
 use serde::{Deserialize, Serialize};
 
+use crate::skill::Skill;
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(from = "HealthHelper")]
 pub struct Health {
@@ -93,27 +95,6 @@ impl From<RenderableHelper> for Renderable {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn renderable_serde() {
-        let json = r###"{"glyph":"a","fg":"#ffffff","bg":"#000000","layer":0}"###;
-        let parsed: Renderable = serde_json::from_str(&json).unwrap();
-        let saved = serde_json::to_string(&parsed).unwrap();
-        let reparsed: Renderable = serde_json::from_str(&saved).unwrap();
-        let data = Renderable {
-            glyph: to_cp437('a'),
-            fg: RGB::from_hex("#ffffff").unwrap(),
-            bg: RGB::from_hex("#000000").unwrap(),
-            layer: 0,
-        };
-        assert_eq!(data, parsed);
-        assert_eq!(data, reparsed);
-    }
-}
-
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Viewer {
     #[serde(default)]
@@ -137,6 +118,11 @@ pub struct Monster {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Skilled {
+    pub skills: Vec<Skill>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Item {}
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -156,3 +142,24 @@ pub enum Grower {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Blocker {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn renderable_serde() {
+        let json = r###"{"glyph":"a","fg":"#ffffff","bg":"#000000","layer":0}"###;
+        let parsed: Renderable = serde_json::from_str(&json).unwrap();
+        let saved = serde_json::to_string(&parsed).unwrap();
+        let reparsed: Renderable = serde_json::from_str(&saved).unwrap();
+        let data = Renderable {
+            glyph: to_cp437('a'),
+            fg: RGB::from_hex("#ffffff").unwrap(),
+            bg: RGB::from_hex("#000000").unwrap(),
+            layer: 0,
+        };
+        assert_eq!(data, parsed);
+        assert_eq!(data, reparsed);
+    }
+}

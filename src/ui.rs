@@ -1,7 +1,7 @@
 use crate::{components::*, map, mapping::Command, OperatingMode, State};
 use bracket_lib::prelude::*;
 
-const SIDEBAR_EXTRA_POS: Point = Point { x: 1, y: 4 };
+const SIDEBAR_EXTRA_POS: Point = Point { x: 1, y: 10 };
 
 pub fn draw_messages(state: &State, ctx: &mut BTerm) {
     for (i, message) in state
@@ -17,23 +17,28 @@ pub fn draw_messages(state: &State, ctx: &mut BTerm) {
 }
 
 pub fn draw_side_info(state: &State, ctx: &mut BTerm) {
-    let mut query = state.ecs.query_one::<&Health>(state.player_entity).unwrap();
-    let health = query.get().unwrap();
+    let mut query = state
+        .ecs
+        .query_one::<(&Health, &Name)>(state.player_entity)
+        .unwrap();
+    let (health, name) = query.get().unwrap();
 
-    let base_x = 1;
-    let base_y = 1;
+    ctx.print(1, 1, format!("Name: {}", name.0));
+
+    let hp_x = 1;
+    let hp_y = 2;
 
     ctx.print(
-        base_x,
-        base_y,
+        hp_x,
+        hp_y,
         format!("Health: {}/{}", health.hp, health.max_hp),
     );
 
     let bar_width = 15;
 
     ctx.draw_bar_horizontal(
-        base_x,
-        base_y + 1,
+        hp_x,
+        hp_y + 1,
         bar_width,
         health.hp,
         health.max_hp,
@@ -174,12 +179,18 @@ pub fn draw_examine_ui(ui_state: &ExamineUIState, state: &State, ctx: &mut BTerm
     ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y, "You see:");
     let idx = state.map.point2d_to_index(ui_state.point);
     if state.map.visible_tiles[idx] {
+        let mut success = false;
+        let mut line = 0;
         for entity in state.map.tile_contents[idx].iter() {
             let mut query = state.ecs.query_one::<&Name>(*entity).unwrap();
             if let Some(name) = query.get() {
-                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, &name.0);
-                return;
+                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1 + line, &name.0);
+                line += 1;
+                success = true;
             }
+        }
+        if success {
+            return;
         }
         match state.map.tiles[idx] {
             map::Tile::Wall => {

@@ -166,8 +166,8 @@ pub fn populate_map(state: &mut State) {
     loop {
         let room_idx = state.rng.range(0, state.map.rooms.len());
         let room = state.map.rooms[room_idx];
-        assert!(room.x1 <= room.x2);
-        assert!(room.y1 <= room.y2);
+        debug_assert!(room.x1 <= room.x2);
+        debug_assert!(room.y1 <= room.y2);
         let monster_x = state.rng.range(room.x1, room.x2);
         let monster_y = state.rng.range(room.y1, room.y2);
         let pt = Point::new(monster_x, monster_y);
@@ -191,8 +191,8 @@ pub fn item_fill_map(state: &mut State) {
     loop {
         let room_idx = state.rng.range(0, state.map.rooms.len());
         let room = state.map.rooms[room_idx];
-        assert!(room.x1 <= room.x2);
-        assert!(room.y1 <= room.y2);
+        debug_assert!(room.x1 <= room.x2);
+        debug_assert!(room.y1 <= room.y2);
         let item_x = state.rng.range(room.x1, room.x2);
         let item_y = state.rng.range(room.y1, room.y2);
         let pt = Point::new(item_x, item_y);
