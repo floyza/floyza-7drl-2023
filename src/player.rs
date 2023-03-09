@@ -1,42 +1,11 @@
 use bracket_lib::prelude::*;
 use hecs::With;
 
-use crate::{commands::Command, components::*, ui, OperatingMode, State};
+use crate::{components::*, mapping::Command, ui, OperatingMode, State};
 
-pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
-    let act: Option<Command> = match key {
-        VirtualKeyCode::H | VirtualKeyCode::Left => Some(Command::Move {
-            target: Point::new(-1, 0),
-        }),
-        VirtualKeyCode::L | VirtualKeyCode::Right => Some(Command::Move {
-            target: Point::new(1, 0),
-        }),
-        VirtualKeyCode::K | VirtualKeyCode::Up => Some(Command::Move {
-            target: Point::new(0, -1),
-        }),
-        VirtualKeyCode::J | VirtualKeyCode::Down => Some(Command::Move {
-            target: Point::new(0, 1),
-        }),
-        VirtualKeyCode::Y => Some(Command::Move {
-            target: Point::new(-1, -1),
-        }),
-        VirtualKeyCode::U => Some(Command::Move {
-            target: Point::new(1, -1),
-        }),
-        VirtualKeyCode::B => Some(Command::Move {
-            target: Point::new(-1, 1),
-        }),
-        VirtualKeyCode::N => Some(Command::Move {
-            target: Point::new(1, 1),
-        }),
-        VirtualKeyCode::G => Some(Command::Grab),
-        VirtualKeyCode::I => Some(Command::OpenInventory),
-        VirtualKeyCode::M => Some(Command::OpenMessageLog),
-        VirtualKeyCode::Period => Some(Command::Wait),
-        _ => None,
-    };
-    match act {
-        Some(Command::Move { target: move_pt }) => {
+pub fn player_act(state: &mut State, command: &Command) -> bool {
+    match *command {
+        Command::Move { target: move_pt } => {
             let position = state
                 .ecs
                 .query_one_mut::<&Position>(state.player_entity)
@@ -78,7 +47,7 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
                 false
             }
         }
-        Some(Command::Grab) => {
+        Command::Grab => {
             let position = state
                 .ecs
                 .query_one_mut::<&Position>(state.player_entity)
@@ -112,10 +81,10 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
                 false
             }
         }
-        Some(Command::OpenInventory) => {
+        Command::OpenInventory => {
             let inv = state
                 .ecs
-                .query_one_mut::<&mut Inventory>(state.player_entity)
+                .query_one_mut::<&Inventory>(state.player_entity)
                 .unwrap();
             state.operating_mode = OperatingMode::OpenInventory(ui::InvUIState {
                 selection: 0,
@@ -123,11 +92,21 @@ pub fn player_act(state: &mut State, key: VirtualKeyCode) -> bool {
             });
             false
         }
-        Some(Command::OpenMessageLog) => {
+        Command::OpenMessageLog => {
             state.operating_mode = OperatingMode::OpenMessageLog;
             false
         }
-        Some(Command::Wait) => true,
-        None => false,
+        Command::OpenExamine => {
+            let player_pos = state
+                .ecs
+                .query_one_mut::<&Position>(state.player_entity)
+                .unwrap();
+            state.operating_mode = OperatingMode::OpenExamine(ui::ExamineUIState {
+                point: player_pos.0,
+            });
+            false
+        }
+        Command::Wait => true,
+        _ => false,
     }
 }

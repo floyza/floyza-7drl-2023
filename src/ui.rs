@@ -1,5 +1,7 @@
-use crate::{components::*, OperatingMode, State};
+use crate::{components::*, map, mapping::Command, OperatingMode, State};
 use bracket_lib::prelude::*;
+
+const SIDEBAR_EXTRA_POS: Point = Point { x: 1, y: 4 };
 
 pub fn draw_messages(state: &State, ctx: &mut BTerm) {
     for (i, message) in state
@@ -40,9 +42,9 @@ pub fn draw_side_info(state: &State, ctx: &mut BTerm) {
     );
 }
 
-pub fn update_message_log(key: VirtualKeyCode) -> bool {
-    match key {
-        VirtualKeyCode::Escape | VirtualKeyCode::Q => {
+pub fn update_message_log(command: Command) -> bool {
+    match command {
+        Command::Back => {
             return true;
         }
         _ => {}
@@ -67,25 +69,29 @@ pub fn draw_message_log(state: &State, ctx: &mut BTerm) {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct InvUIState {
     pub selection: u32,
     pub length: u32,
 }
 
-pub fn update_inventory_ui(mut state: InvUIState, key: VirtualKeyCode) -> (bool, InvUIState) {
-    match key {
-        VirtualKeyCode::K | VirtualKeyCode::Up => {
+pub fn update_inventory_ui(mut state: InvUIState, command: Command) -> (bool, InvUIState) {
+    match command {
+        Command::Move {
+            target: Point { x: 0, y: -1 },
+        } => {
             if state.selection > 0 {
                 state.selection -= 1;
             }
         }
-        VirtualKeyCode::J | VirtualKeyCode::Down => {
+        Command::Move {
+            target: Point { x: 0, y: 1 },
+        } => {
             if state.selection + 1 < state.length {
                 state.selection += 1;
             }
         }
-        VirtualKeyCode::Escape | VirtualKeyCode::Q => {
+        Command::Back => {
             return (true, state);
         }
         _ => {}
@@ -130,5 +136,69 @@ pub fn draw_inventory_ui(ui_state: &InvUIState, state: &State, ctx: &mut BTerm) 
             );
         }
         ctx.print(x + 2, line, name);
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ExamineUIState {
+    pub point: Point,
+}
+
+pub fn update_examine_ui(
+    mut ui_state: ExamineUIState,
+    state: &State,
+    command: Command,
+) -> (bool, ExamineUIState) {
+    match command {
+        Command::Move { target: offset } => {
+            if state.map.in_bounds(ui_state.point + offset) {
+                ui_state.point += offset;
+            }
+        }
+        Command::Back => {
+            return (true, ui_state);
+        }
+        _ => {}
+    }
+    return (false, ui_state);
+}
+
+pub fn draw_examine_ui(ui_state: &ExamineUIState, state: &State, ctx: &mut BTerm) {
+    ctx.set(
+        ui_state.point.x,
+        ui_state.point.y,
+        RGB::named(PURPLE),
+        RGB::named(BLACK),
+        to_cp437('*'),
+    );
+    ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y, "You see:");
+    let idx = state.map.point2d_to_index(ui_state.point);
+    if state.map.visible_tiles[idx] {
+        for entity in state.map.tile_contents[idx].iter() {
+            let mut query = state.ecs.query_one::<&Name>(*entity).unwrap();
+            if let Some(name) = query.get() {
+                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, &name.0);
+                return;
+            }
+        }
+        match state.map.tiles[idx] {
+            map::Tile::Wall => {
+                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Wall");
+            }
+            map::Tile::Floor => {
+                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Floor");
+            }
+        }
+    } else if state.map.revealed_tiles[idx] {
+        match state.map.tiles[idx] {
+            map::Tile::Wall => {
+                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Wall");
+            }
+            map::Tile::Floor => {
+                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Floor");
+            }
+        }
+    } else {
+        ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Nothing");
     }
 }

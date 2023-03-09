@@ -8,11 +8,11 @@ use messages::MessageLog;
 use monster::monster_act;
 use systems::*;
 
-pub mod commands;
 pub mod components;
 pub mod components_serde;
 pub mod item;
 pub mod map;
+pub mod mapping;
 pub mod messages;
 pub mod monster;
 pub mod player;
@@ -37,6 +37,7 @@ pub enum OperatingMode {
     Ticking,
     OpenInventory(ui::InvUIState),
     OpenMessageLog,
+    OpenExamine(ui::ExamineUIState),
 }
 
 impl State {
@@ -52,9 +53,11 @@ impl State {
         ui::draw_messages(self, ctx);
         ui::draw_side_info(self, ctx);
         match &self.operating_mode {
+            OperatingMode::Ticking => {}
+            OperatingMode::WaitingForInput => {}
             OperatingMode::OpenInventory(s) => ui::draw_inventory_ui(s, self, ctx),
             OperatingMode::OpenMessageLog => ui::draw_message_log(self, ctx),
-            _ => {}
+            OperatingMode::OpenExamine(s) => ui::draw_examine_ui(s, self, ctx),
         }
     }
 }
@@ -83,8 +86,8 @@ impl GameState for State {
                     }
                 }
                 OperatingMode::WaitingForInput => {
-                    if let Some(key) = ctx.key.take() {
-                        let player_used_turn = player::player_act(self, key);
+                    if let Some(command) = mapping::get_command(ctx) {
+                        let player_used_turn = player::player_act(self, &command);
                         if player_used_turn {
                             self.turn_order.rotate_left(1);
                             self.operating_mode = OperatingMode::Ticking;
@@ -95,8 +98,8 @@ impl GameState for State {
                     }
                 }
                 OperatingMode::OpenInventory(s) => {
-                    if let Some(key) = ctx.key.take() {
-                        let (done, s) = ui::update_inventory_ui(s.clone(), key);
+                    if let Some(command) = mapping::get_command(ctx) {
+                        let (done, s) = ui::update_inventory_ui(s.clone(), command);
                         if done {
                             self.operating_mode = OperatingMode::Ticking;
                         } else {
@@ -107,9 +110,21 @@ impl GameState for State {
                     }
                 }
                 OperatingMode::OpenMessageLog => {
-                    if let Some(key) = ctx.key.take() {
-                        if ui::update_message_log(key) {
+                    if let Some(command) = mapping::get_command(ctx) {
+                        if ui::update_message_log(command) {
                             self.operating_mode = OperatingMode::Ticking;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                OperatingMode::OpenExamine(s) => {
+                    if let Some(command) = mapping::get_command(ctx) {
+                        let (done, s) = ui::update_examine_ui(s.clone(), self, command);
+                        if done {
+                            self.operating_mode = OperatingMode::Ticking;
+                        } else {
+                            self.operating_mode = OperatingMode::OpenExamine(s);
                         }
                     } else {
                         break;
