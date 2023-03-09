@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::components::*;
 use hecs::{Entity, NoSuchEntity, World};
 use serde::{Deserialize, Serialize};
@@ -19,6 +21,9 @@ pub enum Component {
     Blueprint(Blueprint),
 }
 
+pub trait IsComponent: Debug {}
+impl<T: Debug> IsComponent for T {}
+
 impl Component {
     pub fn insert(self, ecs: &mut World, entity: Entity) -> Result<(), NoSuchEntity> {
         match self {
@@ -35,6 +40,23 @@ impl Component {
             Component::Grower(c) => ecs.insert_one(entity, c),
             Component::Blocker(c) => ecs.insert_one(entity, c),
             Component::Blueprint(c) => ecs.insert_one(entity, c),
+        }
+    }
+    pub fn apply(&self, mut f: impl FnMut(&dyn IsComponent)) {
+        match self {
+            Component::Health(c) => f(c),
+            Component::Attack(c) => f(c),
+            Component::Position(c) => f(c),
+            Component::Renderable(c) => f(c),
+            Component::Viewer(c) => f(c),
+            Component::Player(c) => f(c),
+            Component::Monster(c) => f(c),
+            Component::Skilled(c) => f(c),
+            Component::Item(c) => f(c),
+            Component::Name(c) => f(c),
+            Component::Grower(c) => f(c),
+            Component::Blocker(c) => f(c),
+            Component::Blueprint(c) => f(c),
         }
     }
 }

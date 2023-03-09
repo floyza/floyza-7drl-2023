@@ -189,11 +189,15 @@ pub fn draw_examine_ui(ui_state: &ExamineUIState, state: &State, ctx: &mut BTerm
                 if state.debug {
                     let stuff = debug::get_entity_components(state.ecs.entity(*entity).unwrap());
                     for comp in stuff {
-                        ctx.print(
-                            SIDEBAR_EXTRA_POS.x,
-                            SIDEBAR_EXTRA_POS.y + 1 + line,
-                            format!("-> {:?}", comp),
-                        );
+                        comp.apply(|c| {
+                            ctx.print_color(
+                                SIDEBAR_EXTRA_POS.x,
+                                SIDEBAR_EXTRA_POS.y + 1 + line,
+                                RGB::named(WHITE),
+                                RGB::named(BLACK),
+                                format!("-> {:?}", c),
+                            );
+                        });
                         line += 1;
                     }
                 }
