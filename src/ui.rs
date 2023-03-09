@@ -1,4 +1,4 @@
-use crate::{components::*, map, mapping::Command, OperatingMode, State};
+use crate::{components::*, debug, map, mapping::Command, OperatingMode, State};
 use bracket_lib::prelude::*;
 
 const SIDEBAR_EXTRA_POS: Point = Point { x: 1, y: 10 };
@@ -186,6 +186,17 @@ pub fn draw_examine_ui(ui_state: &ExamineUIState, state: &State, ctx: &mut BTerm
             if let Some(name) = query.get() {
                 ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1 + line, &name.0);
                 line += 1;
+                if state.debug {
+                    let stuff = debug::get_entity_components(state.ecs.entity(*entity).unwrap());
+                    for comp in stuff {
+                        ctx.print(
+                            SIDEBAR_EXTRA_POS.x,
+                            SIDEBAR_EXTRA_POS.y + 1 + line,
+                            format!("-> {:?}", comp),
+                        );
+                        line += 1;
+                    }
+                }
                 success = true;
             }
         }

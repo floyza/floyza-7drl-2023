@@ -11,6 +11,7 @@ use systems::*;
 pub mod blueprint;
 pub mod components;
 pub mod components_serde;
+pub mod debug;
 pub mod item;
 pub mod map;
 pub mod mapping;
@@ -32,6 +33,7 @@ pub struct State {
     pub has_moved: bool,
     pub turn_order: VecDeque<Entity>,
     pub operating_mode: OperatingMode,
+    pub debug: bool,
 }
 
 pub enum OperatingMode {
@@ -205,6 +207,7 @@ fn main() -> BError {
         has_moved: false,
         turn_order: VecDeque::new(),
         operating_mode: OperatingMode::Ticking,
+        debug: true,
     };
 
     state.turn_order.push_back(player_entity);
