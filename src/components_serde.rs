@@ -16,6 +16,7 @@ pub enum Component {
     Name(Name),
     Grower(Grower),
     Blocker(Blocker),
+    Blueprint(Blueprint),
 }
 
 impl Component {
@@ -33,6 +34,7 @@ impl Component {
             Component::Name(c) => ecs.insert_one(entity, c),
             Component::Grower(c) => ecs.insert_one(entity, c),
             Component::Blocker(c) => ecs.insert_one(entity, c),
+            Component::Blueprint(c) => ecs.insert_one(entity, c),
         }
     }
 }

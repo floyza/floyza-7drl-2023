@@ -42,13 +42,18 @@
   ],
   "items": [
     [
-      { "Name": "Seed of Power" },
+      { "Name": "Simple Wooden Sword" },
       {
         "Renderable": {
-          "glyph": "*",
-          "fg": "#22ff22",
+          "glyph": "/",
+          "fg": "#a52a2a",
           "bg": "#000000",
           "layer": 0
+        }
+      },
+      {
+        "Blueprint": {
+          "img": "Sword"
         }
       }
     ]

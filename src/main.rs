@@ -8,6 +8,7 @@ use messages::MessageLog;
 use monster::monster_act;
 use systems::*;
 
+pub mod blueprint;
 pub mod components;
 pub mod components_serde;
 pub mod item;
@@ -139,6 +140,7 @@ impl GameState for State {
 
 fn main() -> BError {
     raws::load_raws();
+    blueprint::load_blueprints();
 
     let mut world = World::new();
     let map = map::Map::new();

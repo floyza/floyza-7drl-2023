@@ -2,7 +2,7 @@ use bracket_lib::prelude::*;
 use hecs::Entity;
 use serde::{Deserialize, Serialize};
 
-use crate::skill::Skill;
+use crate::{blueprint::BPImage, skill::Skill};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(from = "HealthHelper")]
@@ -142,6 +142,13 @@ pub enum Grower {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Blocker {}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Blueprint {
+    img: BPImage,
+    #[serde(default)]
+    filled: Vec<bool>,
+}
 
 #[cfg(test)]
 mod tests {
