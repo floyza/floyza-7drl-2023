@@ -1,6 +1,7 @@
 {
-  "monsters": [
-    [
+  "monsters": {
+    "0": [
+      [
       { "Name": "Orc" },
       {
         "Health": { "max_hp": 30 }
@@ -17,7 +18,7 @@
         }
       }
     ],
-    [
+      [
       { "Name": "Orc Archer" },
       {
         "Health": { "max_hp": 20 }
@@ -39,9 +40,30 @@
         }
       }
     ]
-  ],
-  "items": [
-    [
+    ],
+    "1": [
+      [
+      { "Name": "Orc Lvl 2" },
+      {
+        "Health": { "max_hp": 20 }
+      },
+      { "Attack": { "damage": 8 } },
+      { "Viewer": { "range": 8 } },
+      { "Blocker": {} },
+      {
+        "Renderable": {
+          "glyph": "o",
+          "fg": "#ffbfff",
+          "bg": "#000000",
+          "layer": 1
+        }
+      }
+    ]
+    ]
+  },
+  "items": {
+    "0":[
+      [
       { "Name": "Simple Wooden Sword" },
       {
         "Renderable": {
@@ -57,5 +79,24 @@
         }
       }
     ]
-  ]
+    ],
+    "1":[
+      [
+      { "Name": "Simple Wooden Sword v2" },
+      {
+        "Renderable": {
+          "glyph": "/",
+          "fg": "#a52aff",
+          "bg": "#000000",
+          "layer": 0
+        }
+      },
+      {
+        "Blueprint": {
+          "img": "Sword"
+        }
+      }
+    ]
+    ]
+  }
 }

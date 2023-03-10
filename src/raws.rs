@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::{collections::HashMap, sync::Mutex};
 
 use bracket_lib::prelude::*;
 use lazy_static::lazy_static;
@@ -8,16 +8,16 @@ use crate::components_serde::Component;
 
 #[derive(Deserialize, Debug)]
 pub struct Raws {
-    pub monsters: Vec<Vec<Component>>, // no need to manually add `Monster` component
-    pub items: Vec<Vec<Component>>,    // same as above, but with `Item` component
+    pub monsters: HashMap<i32, Vec<Vec<Component>>>, // no need to manually add `Monster` component
+    pub items: HashMap<i32, Vec<Vec<Component>>>,    // same as above, but with `Item` component
 }
 
 embedded_resource!(RAW_FILE, "../raws/spawns.json");
 
 lazy_static! {
     pub static ref RAWS: Mutex<Raws> = Mutex::new(Raws {
-        monsters: Vec::new(),
-        items: Vec::new()
+        monsters: HashMap::new(),
+        items: HashMap::new(),
     });
 }
 

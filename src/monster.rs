@@ -83,12 +83,13 @@ pub fn monster_act(state: &mut State, entity: Entity) {
     }
 }
 
-pub fn spawn_monster(state: &mut State, pos: Point) -> Entity {
+pub fn spawn_monster(state: &mut State, dl: i32, pos: Point) -> Entity {
     let entity = state.ecs.spawn(());
     {
         let raws = RAWS.lock().unwrap();
-        let monster_of_choice = state.rng.range(0, raws.monsters.len());
-        for component in raws.monsters[monster_of_choice].iter() {
+        let monsters = &raws.monsters[&dl];
+        let monster_of_choice = state.rng.range(0, monsters.len());
+        for component in monsters[monster_of_choice].iter() {
             component.clone().insert(&mut state.ecs, entity).unwrap();
         }
     }

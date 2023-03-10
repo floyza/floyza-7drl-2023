@@ -3,12 +3,13 @@ use hecs::Entity;
 
 use crate::{components::*, raws::RAWS, State};
 
-pub fn spawn_item(state: &mut State, pos: Point) -> Entity {
+pub fn spawn_item(state: &mut State, dl: i32, pos: Point) -> Entity {
     let entity = state.ecs.spawn(());
     {
         let raws = RAWS.lock().unwrap();
-        let item_of_choice = state.rng.range(0, raws.items.len());
-        for component in raws.items[item_of_choice].iter() {
+        let items = &raws.items[&dl];
+        let item_of_choice = state.rng.range(0, items.len());
+        for component in items[item_of_choice].iter() {
             component.clone().insert(&mut state.ecs, entity).unwrap();
         }
     }

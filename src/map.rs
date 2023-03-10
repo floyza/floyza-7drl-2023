@@ -188,7 +188,7 @@ pub fn populate_map(state: &mut State) {
         }
     }
     for pt in new_monsters {
-        let entity = crate::monster::spawn_monster(state, pt);
+        let entity = crate::monster::spawn_monster(state, state.map.difficulty_level, pt);
         state.turn_order.push_back(entity);
     }
 }
@@ -213,7 +213,7 @@ pub fn item_fill_map(state: &mut State) {
         }
     }
     for pt in new_items {
-        crate::item::spawn_item(state, pt);
+        crate::item::spawn_item(state, state.map.difficulty_level, pt);
     }
 }
 
