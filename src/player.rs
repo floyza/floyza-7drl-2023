@@ -1,7 +1,7 @@
 use bracket_lib::prelude::*;
 use hecs::With;
 
-use crate::{components::*, mapping::Command, ui, OperatingMode, State};
+use crate::{components::*, map, mapping::Command, ui, OperatingMode, State};
 
 pub fn player_act(state: &mut State, command: &Command) -> bool {
     match *command {
@@ -107,6 +107,19 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
             false
         }
         Command::Wait => true,
+        Command::DescendStairs => {
+            let player_pos = state
+                .ecs
+                .query_one_mut::<&Position>(state.player_entity)
+                .unwrap();
+            let idx = state.map.point2d_to_index(player_pos.0);
+            if idx == state.map.stairs {
+                state.messages.enqueue_message("You descend the stairs.");
+                map::new_floor(state);
+                return true;
+            }
+            false
+        }
         _ => false,
     }
 }

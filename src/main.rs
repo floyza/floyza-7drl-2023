@@ -144,8 +144,9 @@ fn main() -> BError {
     raws::load_raws();
     blueprint::load_blueprints();
 
+    let mut rng = RandomNumberGenerator::new();
     let mut world = World::new();
-    let map = map::Map::new();
+    let map = map::Map::new(0, &mut rng);
     let player_pos = map.rooms[0].center();
     let player_entity = world.spawn((
         Health { max_hp: 80, hp: 80 },
@@ -170,36 +171,12 @@ fn main() -> BError {
         Attack { damage: 10 },
     ));
 
-    // generate some simple stuff for testing
-    world.spawn((
-        Position(map.rooms[0].center() + Point::new(0, 1)),
-        Item {},
-        Renderable {
-            glyph: to_cp437('!'),
-            fg: RGB::named(RED),
-            bg: RGB::named(BLACK),
-            layer: 0,
-        },
-        Name("Potion of Redness".to_string()),
-    ));
-    world.spawn((
-        Position(map.rooms[0].center() + Point::new(1, 1)),
-        Item {},
-        Renderable {
-            glyph: to_cp437('!'),
-            fg: RGB::named(BLUE),
-            bg: RGB::named(BLACK),
-            layer: 0,
-        },
-        Name("Potion of Blueness".to_string()),
-    ));
-
     let mut state = State {
         size: Point::new(80, 50),
         ecs: world,
         map,
         player_entity,
-        rng: RandomNumberGenerator::new(),
+        rng,
         messages: MessageLog {
             log: Vec::new(),
             current_messages: Vec::new(),

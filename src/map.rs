@@ -13,9 +13,11 @@ pub enum Tile {
 }
 
 pub struct Map {
+    pub difficulty_level: i32,
     pub tiles: Vec<Tile>,
     pub width: i32,
     pub height: i32,
+    pub stairs: usize,
     pub rooms: Vec<Rect>,
     pub visible_tiles: Vec<bool>,
     pub revealed_tiles: Vec<bool>,
@@ -73,10 +75,12 @@ impl BaseMap for Map {
 }
 
 impl Map {
-    pub fn new() -> Map {
+    pub fn new(dl: i32, rng: &mut RandomNumberGenerator) -> Map {
         let mut map = Map {
+            difficulty_level: dl,
             tiles: vec![Tile::Wall; 80 * 50],
             rooms: Vec::new(),
+            stairs: 0,
             width: 80,
             height: 50,
             visible_tiles: vec![false; 80 * 50],
@@ -86,7 +90,6 @@ impl Map {
         };
 
         let mut rooms = Vec::<Rect>::new();
-        let mut rng = RandomNumberGenerator::new();
 
         for _i in 0..11 {
             let new_room = loop {
@@ -152,6 +155,7 @@ impl Map {
             }
         }
 
+        map.stairs = map.point2d_to_index(random_room_point(&map, rng));
         map
     }
 
@@ -160,17 +164,21 @@ impl Map {
     }
 }
 
+pub fn random_room_point(map: &Map, rng: &mut RandomNumberGenerator) -> Point {
+    let room_idx = rng.range(0, map.rooms.len());
+    let room = map.rooms[room_idx];
+    debug_assert!(room.x1 <= room.x2);
+    debug_assert!(room.y1 <= room.y2);
+    let x = rng.range(room.x1, room.x2);
+    let y = rng.range(room.y1, room.y2);
+    Point::new(x, y)
+}
+
 pub fn populate_map(state: &mut State) {
     let mut new_monsters: Vec<Point> = Vec::new();
     let mut count = 0;
     loop {
-        let room_idx = state.rng.range(0, state.map.rooms.len());
-        let room = state.map.rooms[room_idx];
-        debug_assert!(room.x1 <= room.x2);
-        debug_assert!(room.y1 <= room.y2);
-        let monster_x = state.rng.range(room.x1, room.x2);
-        let monster_y = state.rng.range(room.y1, room.y2);
-        let pt = Point::new(monster_x, monster_y);
+        let pt = random_room_point(&state.map, &mut state.rng);
         if !new_monsters.contains(&pt) {
             new_monsters.push(pt);
             count += 1;
@@ -214,7 +222,7 @@ pub fn draw_map(state: &State, ctx: &mut BTerm) {
     let mut x = 0;
     for (idx, tile) in state.map.tiles.iter().enumerate() {
         if state.map.revealed_tiles[idx] {
-            let glyph;
+            let mut glyph;
             let mut fg;
             match tile {
                 Tile::Floor => {
@@ -225,6 +233,10 @@ pub fn draw_map(state: &State, ctx: &mut BTerm) {
                     glyph = to_cp437('#');
                     fg = RGB::from_f32(0., 1., 0.);
                 }
+            }
+            if idx == state.map.stairs {
+                glyph = to_cp437('>');
+                fg = RGB::from_hex("#da2c43").unwrap();
             }
             if !state.map.visible_tiles[idx] {
                 fg = fg.to_greyscale();
@@ -259,4 +271,29 @@ fn draw_entities(state: &State, ctx: &mut BTerm) {
             ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
         }
     }
+}
+
+pub fn new_floor(state: &mut State) {
+    let new_map = Map::new(state.map.difficulty_level + 1, &mut state.rng);
+    state.map = new_map;
+    let (position, viewer) = state
+        .ecs
+        .query_one_mut::<(&mut Position, &mut Viewer)>(state.player_entity)
+        .unwrap();
+    position.0 = state.map.rooms[0].center();
+    viewer.dirty = true;
+    let mut gone = vec![];
+    for (ent, _i) in state.ecs.query_mut::<&Item>() {
+        gone.push(ent);
+    }
+    for (ent, _i) in state.ecs.query_mut::<&Monster>() {
+        gone.push(ent);
+    }
+    for ent in gone {
+        state.ecs.despawn(ent).unwrap();
+    }
+    state.turn_order.clear();
+    state.turn_order.push_back(state.player_entity);
+    populate_map(state);
+    item_fill_map(state);
 }

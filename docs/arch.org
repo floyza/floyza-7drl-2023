@@ -5,3 +5,7 @@
 Must be updated between movement and looking around
 ** tile_contents
 Must be updated between picking up an item and messing around with tile_contents again
+* Layers
+- 0 :: items
+- 1 :: monsters, player
+- 10 :: stairs
