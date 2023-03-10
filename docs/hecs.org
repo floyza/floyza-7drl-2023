@@ -1,0 +1,26 @@
+#+title: Hecs
+
+* World
+** spawn
+create new entity
+see also: spawn_batch
+** despawn
+delete entity + components
+** clear
+clear
+** contains
+test for existence
+** query, query_mut
+query for component combinations
+uses dynamic borrow checking
+use query_mut when not concurrent
+** query_one, query_one_mut
+query single entity
+use query_one_mut when not concurrent
+** insert, insert_one
+add component to entity
+replaces it if it exists
+** remove, remove_one
+remove components from entity
+* With, Without
+add stuff to a query without actually grabbing it
