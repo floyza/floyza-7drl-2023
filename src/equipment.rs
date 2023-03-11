@@ -118,6 +118,62 @@ impl fmt::Debug for PassiveEquipment {
     }
 }
 
+pub fn execute_attack_effects(state: &mut State, target: Entity) {
+    let player = state
+        .ecs
+        .query_one_mut::<&mut Player>(state.player_entity)
+        .unwrap();
+    let mut equip = vec![];
+    for (i, eq_maybe) in player.passive_equipment.iter_mut().enumerate() {
+        let Some(eq) = eq_maybe else {continue};
+        if matches!(
+            eq.effect,
+            EquipmentEffect::Passive(PassiveEquipment::AttackEffect(_))
+        ) {
+            equip.push((i, eq_maybe.take().unwrap()));
+        }
+    }
+    for (i, eq) in equip {
+        let EquipmentEffect::Passive(PassiveEquipment::AttackEffect(eff)) =
+                                eq.effect else {panic!()};
+        eff(state, target, &eq.ingredients.1);
+        let player = state
+            .ecs
+            .query_one_mut::<&mut Player>(state.player_entity)
+            .unwrap();
+        debug_assert!(player.passive_equipment[i].is_none());
+        player.passive_equipment[i] = Some(eq);
+    }
+}
+
+pub fn execute_defence_effects(state: &mut State, target: Entity) {
+    let player = state
+        .ecs
+        .query_one_mut::<&mut Player>(state.player_entity)
+        .unwrap();
+    let mut equip = vec![];
+    for (i, eq_maybe) in player.passive_equipment.iter_mut().enumerate() {
+        let Some(eq) = eq_maybe else {continue};
+        if matches!(
+            eq.effect,
+            EquipmentEffect::Passive(PassiveEquipment::GotHitEffect(_))
+        ) {
+            equip.push((i, eq_maybe.take().unwrap()));
+        }
+    }
+    for (i, eq) in equip {
+        let EquipmentEffect::Passive(PassiveEquipment::GotHitEffect(eff)) =
+                                eq.effect else {panic!()};
+        eff(state, target, &eq.ingredients.1);
+        let player = state
+            .ecs
+            .query_one_mut::<&mut Player>(state.player_entity)
+            .unwrap();
+        debug_assert!(player.passive_equipment[i].is_none());
+        player.passive_equipment[i] = Some(eq);
+    }
+}
+
 pub fn build_blueprint(bp: &Blueprint) -> Equipment {
     let mut gems = vec![];
     for i in 0..bp.filled.len() {

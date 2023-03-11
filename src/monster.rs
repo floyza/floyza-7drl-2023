@@ -1,4 +1,4 @@
-use crate::{components::*, raws::RAWS, State};
+use crate::{components::*, equipment::execute_defence_effects, raws::RAWS, State};
 use bracket_lib::prelude::*;
 use hecs::Entity;
 use rand::{distributions::WeightedIndex, prelude::Distribution};
@@ -68,6 +68,7 @@ pub fn monster_act(state: &mut State, entity: Entity) {
                     .query_one_mut::<&mut Health>(state.player_entity)
                     .unwrap();
                 player_hp.hp -= damage;
+                execute_defence_effects(state, entity);
             }
         } else {
             pos.0 = pt;

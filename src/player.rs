@@ -3,7 +3,7 @@ use hecs::With;
 
 use crate::{
     components::*,
-    equipment::{build_blueprint, EquipmentEffect, PassiveEquipment},
+    equipment::{build_blueprint, execute_attack_effects, EquipmentEffect, PassiveEquipment},
     map,
     mapping::Command,
     ui, OperatingMode, State,
@@ -45,31 +45,7 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
                         name.0, attacker.damage
                     ));
                     health.hp -= attacker.damage;
-                    let player = state
-                        .ecs
-                        .query_one_mut::<&mut Player>(state.player_entity)
-                        .unwrap();
-                    let mut equip = vec![];
-                    for (i, eq_maybe) in player.passive_equipment.iter_mut().enumerate() {
-                        let Some(eq) = eq_maybe else {continue};
-                        if matches!(
-                            eq.effect,
-                            EquipmentEffect::Passive(PassiveEquipment::AttackEffect(_))
-                        ) {
-                            equip.push((i, eq_maybe.take().unwrap()));
-                        }
-                    }
-                    for (i, eq) in equip {
-                        let EquipmentEffect::Passive(PassiveEquipment::AttackEffect(eff)) =
-                                eq.effect else {panic!()};
-                        eff(state, target, &eq.ingredients.1);
-                        let player = state
-                            .ecs
-                            .query_one_mut::<&mut Player>(state.player_entity)
-                            .unwrap();
-                        debug_assert!(player.passive_equipment[i].is_none());
-                        player.passive_equipment[i] = Some(eq);
-                    }
+                    execute_attack_effects(state, target);
                     return true;
                 }
             }

@@ -6,9 +6,15 @@ pub fn normalize_pt(pt: Point) -> Point {
     let mut x = pt.x.abs();
     let mut y = pt.y.abs();
     if x > y {
+        if x == 0 {
+            return Point::new(0, 0);
+        }
         y = (y as f32 / x as f32).round() as i32;
         x = 1;
     } else {
+        if y == 0 {
+            return Point::new(0, 0);
+        }
         x = (x as f32 / y as f32).round() as i32;
         y = 1;
     }

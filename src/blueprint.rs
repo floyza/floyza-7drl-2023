@@ -31,26 +31,27 @@ lazy_static! {
 
 pub fn load_blueprints() {
     link_resource!(BP_SWORD, "../assets/sword.xp");
-    link_resource!(BP_ARMOR, "../assets/sword.xp");
+    link_resource!(BP_ARMOR, "../assets/armor.xp");
+    let mut map = HashMap::new();
     {
         let xp = XpFile::from_resource("../assets/sword.xp").unwrap();
-        let map = HashMap::from([(
+        map.insert(
             BPImage::Sword,
             BPIData {
                 img: xp,
                 gem_spots: vec![Point::new(8, 19)],
             },
-        )]);
+        );
     }
     {
         let xp = XpFile::from_resource("../assets/armor.xp").unwrap();
-        let map = HashMap::from([(
+        map.insert(
             BPImage::Armor,
             BPIData {
                 img: xp,
                 gem_spots: vec![Point::new(8, 15)],
             },
-        )]);
+        );
     }
     *BLUEPRINTS.lock().unwrap() = map;
 }
