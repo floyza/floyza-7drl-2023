@@ -37,7 +37,7 @@
         },
         {
           "Skilled": {
-            "skills": ["ShootBow"]
+            "skills": [[1.0, "ShootBow"]]
           }
         }
       ]

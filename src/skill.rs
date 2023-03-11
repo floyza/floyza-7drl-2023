@@ -10,12 +10,6 @@ pub enum Skill {
 }
 
 impl Skill {
-    /// Weight for action -- normal action has weight of 1.0
-    pub fn get_prob(self) -> f32 {
-        match self {
-            Skill::ShootBow => 0.5,
-        }
-    }
     /// Returns true if succeeds. Otherwise, try a different skill
     pub fn apply(self, source: Entity, target: Entity, state: &mut State) -> Option<()> {
         debug_assert!(target != source);

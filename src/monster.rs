@@ -23,11 +23,7 @@ pub fn monster_act(state: &mut State, entity: Entity) {
     }
     if let Some(skilled) = skilled {
         let len = skilled.skills.len();
-        let mut weights: Vec<f32> = skilled
-            .skills
-            .iter()
-            .map(|x| x.get_prob() / len as f32)
-            .collect();
+        let mut weights: Vec<f32> = skilled.skills.iter().map(|x| x.0 / len as f32).collect();
         weights.push(1.0); // for normal action
         let dist = WeightedIndex::new(weights).unwrap();
         let roll = dist.sample(state.rng.get_rng());
@@ -35,7 +31,7 @@ pub fn monster_act(state: &mut State, entity: Entity) {
         if roll != len {
             // if not normal attack
             let skill = skilled.skills[roll];
-            success = skill.apply(entity, state.player_entity, state).is_some();
+            success = skill.1.apply(entity, state.player_entity, state).is_some();
         }
         if success {
             return;

@@ -209,7 +209,7 @@ fn main() -> BError {
     ));
 
     let mut state = State {
-        size: Point::new(80, 50),
+        size: Point::new(100, 70),
         ecs: world,
         map,
         player_entity,
@@ -229,8 +229,6 @@ fn main() -> BError {
     populate_map(&mut state);
     item_fill_map(&mut state);
 
-    let context = BTermBuilder::simple80x50()
-        .with_title("Be what you sow")
-        .build()?;
+    let context = BTermBuilder::simple(100, 70)?.with_title("tba").build()?;
     main_loop(context, state)
 }

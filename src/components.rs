@@ -121,7 +121,8 @@ pub struct Monster {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Skilled {
-    pub skills: Vec<Skill>,
+    /// (probability_weight, skill) -- default action (e.g. move/hit) has weight of 1.0
+    pub skills: Vec<(f32, Skill)>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]

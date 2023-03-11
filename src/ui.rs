@@ -4,7 +4,7 @@ use bracket_lib::prelude::*;
 pub const SIDEBAR_EXTRA_POS: Point = Point { x: 1, y: 10 };
 pub const LEFT_SIDEBAR_WIDTH: i32 = 20;
 pub const RIGHT_SIDEBAR_WIDTH: i32 = 20;
-pub const MESSAGE_LOG_HEIGHT: i32 = 5;
+pub const MESSAGE_LOG_HEIGHT: i32 = 8;
 
 pub fn draw_corners(state: &State, ctx: &mut BTerm) {
     ctx.set(
