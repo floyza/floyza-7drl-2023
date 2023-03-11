@@ -105,7 +105,26 @@ pub fn draw_current_blueprint(state: &State, ctx: &mut BTerm) {
     let mut query = state.ecs.query_one::<&Player>(state.player_entity).unwrap();
     let bp = &query.get().unwrap().current_blueprint;
     if let Some(bp) = bp {
-        ctx.render_xp_sprite(&bp.img.lookup().img, sidebar_x + 2, 1);
+        let offset_x = 2;
+        let offset_y = 1;
+        let bpi = bp.img.lookup();
+        ctx.render_xp_sprite(&bpi.img, sidebar_x + offset_x, offset_y);
+        for slot in bp.filled.iter() {
+            let gem = bpi.gem_spots[slot.0];
+            let color = match slot.1 {
+                Elemental::Air => RGB::named(SKYBLUE),
+                Elemental::Water => RGB::named(DARKBLUE),
+                Elemental::Fire => RGB::named(RED),
+                Elemental::Earth => RGB::named(BROWN1),
+            };
+            ctx.set(
+                sidebar_x + offset_x + gem.x,
+                offset_y + gem.y,
+                color,
+                RGB::named(BLACK),
+                to_cp437('☼'),
+            );
+        }
     } else {
         ctx.print(sidebar_x + 1, 1, "No active blueprint");
     }

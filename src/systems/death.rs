@@ -1,10 +1,16 @@
-use crate::{components::Health, State};
+use crate::{components::*, essence::gain_essence, State};
 
 pub fn system_kill_dead(state: &mut State) {
     let mut dead = vec![];
-    for (id, health) in state.ecs.query_mut::<&Health>() {
+    let mut reaped_essence = vec![];
+    for (id, (elem, health)) in state.ecs.query_mut::<(Option<&Elemental>, &Health)>() {
         if health.hp <= 0 {
             dead.push(id);
+            if let Some(elem) = elem {
+                if state.rng.range(0, 4) == 0 {
+                    reaped_essence.push(elem.clone());
+                }
+            }
         }
     }
     for id in dead {
@@ -15,5 +21,8 @@ pub fn system_kill_dead(state: &mut State) {
         if let Some((i, _)) = state.turn_order.iter().enumerate().find(|(_, e)| **e == id) {
             state.turn_order.remove(i);
         }
+    }
+    for essence in reaped_essence {
+        gain_essence(state, essence);
     }
 }

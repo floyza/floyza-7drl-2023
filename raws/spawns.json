@@ -36,6 +36,9 @@
           }
         },
         {
+          "Elemental": "Air"
+        },
+        {
           "Skilled": {
             "skills": [[1.0, "ShootBow"]]
           }

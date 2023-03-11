@@ -150,7 +150,7 @@ pub struct Blocker {}
 pub struct Blueprint {
     pub img: BPImage,
     #[serde(default)]
-    pub filled: Vec<bool>,
+    pub filled: Vec<(usize, Elemental)>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -163,6 +163,18 @@ pub enum Elemental {
     Water,
     Air,
     Earth,
+}
+
+impl std::fmt::Display for Elemental {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            Elemental::Fire => "Fire",
+            Elemental::Water => "Water",
+            Elemental::Air => "Air",
+            Elemental::Earth => "Earth",
+        };
+        write!(f, "{}", str)
+    }
 }
 
 #[cfg(test)]
