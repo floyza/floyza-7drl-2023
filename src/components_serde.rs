@@ -19,6 +19,7 @@ pub enum Component {
     Grower(Grower),
     Blocker(Blocker),
     Blueprint(Blueprint),
+    Ephermal(Ephermal),
 }
 
 pub trait IsComponent: Debug {}
@@ -40,6 +41,7 @@ impl Component {
             Component::Grower(c) => ecs.insert_one(entity, c),
             Component::Blocker(c) => ecs.insert_one(entity, c),
             Component::Blueprint(c) => ecs.insert_one(entity, c),
+            Component::Ephermal(c) => ecs.insert_one(entity, c),
         }
     }
     pub fn apply(&self, mut f: impl FnMut(&dyn IsComponent)) {
@@ -57,6 +59,7 @@ impl Component {
             Component::Grower(c) => f(c),
             Component::Blocker(c) => f(c),
             Component::Blueprint(c) => f(c),
+            Component::Ephermal(c) => f(c),
         }
     }
 }

@@ -109,7 +109,9 @@ const fn _default_true() -> bool {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct Player {}
+pub struct Player {
+    pub current_blueprint: Option<Blueprint>,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Monster {
@@ -145,10 +147,14 @@ pub struct Blocker {}
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Blueprint {
-    img: BPImage,
+    pub img: BPImage,
     #[serde(default)]
-    filled: Vec<bool>,
+    pub filled: Vec<bool>,
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+/// gets removed when we go into a new level
+pub struct Ephermal;
 
 #[cfg(test)]
 mod tests {

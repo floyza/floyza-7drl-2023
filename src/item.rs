@@ -13,6 +13,9 @@ pub fn spawn_item(state: &mut State, dl: i32, pos: Point) -> Entity {
             component.clone().insert(&mut state.ecs, entity).unwrap();
         }
     }
-    state.ecs.insert(entity, (Item {}, Position(pos))).unwrap();
+    state
+        .ecs
+        .insert(entity, (Item {}, Position(pos), Ephermal))
+        .unwrap();
     entity
 }

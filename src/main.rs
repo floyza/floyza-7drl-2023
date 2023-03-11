@@ -56,6 +56,8 @@ impl State {
         map::draw_map(self, ctx);
         ui::draw_messages(self, ctx);
         ui::draw_side_info(self, ctx);
+        ui::draw_current_blueprint(self, ctx);
+        ui::draw_corners(self, ctx);
         match &self.operating_mode {
             OperatingMode::Ticking => {}
             OperatingMode::WaitingForInput => {}
@@ -103,9 +105,39 @@ impl GameState for State {
                 }
                 OperatingMode::OpenInventory(s) => {
                     if let Some(command) = mapping::get_command(ctx) {
-                        let (done, s) = ui::update_inventory_ui(s.clone(), command);
-                        if done {
-                            self.operating_mode = OperatingMode::Ticking;
+                        let (ret, s) = ui::update_inventory_ui(s.clone(), command);
+                        if let Some(ret) = ret {
+                            match ret {
+                                ui::InvUIRes::Select(idx) => {
+                                    let inv = self
+                                        .ecs
+                                        .query_one_mut::<&Inventory>(self.player_entity)
+                                        .unwrap();
+                                    let item = inv.contents[idx as usize];
+                                    if let Ok(bp) = self.ecs.query_one_mut::<&Blueprint>(item) {
+                                        let bp = bp.clone();
+                                        let (p, inv) = self
+                                            .ecs
+                                            .query_one_mut::<(&mut Player, &mut Inventory)>(
+                                                self.player_entity,
+                                            )
+                                            .unwrap();
+                                        p.current_blueprint = Some(bp);
+                                        inv.contents.remove(idx as usize);
+                                        self.operating_mode = OperatingMode::Ticking;
+                                    } else {
+                                        let name = self.ecs.query_one_mut::<&Name>(item).unwrap();
+                                        self.messages.enqueue_message(&format!(
+                                            "Could not attach {}: it's not a blueprint.",
+                                            name.0
+                                        ));
+                                        self.operating_mode = OperatingMode::Ticking;
+                                    }
+                                }
+                                ui::InvUIRes::Done => {
+                                    self.operating_mode = OperatingMode::Ticking;
+                                }
+                            }
                         } else {
                             self.operating_mode = OperatingMode::OpenInventory(s);
                         }
@@ -151,7 +183,9 @@ fn main() -> BError {
     let player_entity = world.spawn((
         Health { max_hp: 80, hp: 80 },
         Position(player_pos),
-        Player {},
+        Player {
+            current_blueprint: None,
+        },
         Viewer {
             visible_tiles: Vec::new(),
             range: 8,

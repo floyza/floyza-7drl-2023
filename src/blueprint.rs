@@ -9,10 +9,16 @@ pub enum BPImage {
     Sword,
 }
 
+impl BPImage {
+    pub fn lookup(self) -> BPIData {
+        BLUEPRINTS.lock().unwrap()[&self].clone()
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct BPIData {
-    img: XpFile,
-    gem_spots: Vec<Point>,
+    pub img: XpFile,
+    pub gem_spots: Vec<Point>,
 }
 
 embedded_resource!(BP_SWORD, "../assets/sword.xp");

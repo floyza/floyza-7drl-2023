@@ -222,7 +222,7 @@ pub fn draw_map(state: &State, ctx: &mut BTerm) {
     let mut x = 0;
     for (idx, tile) in state.map.tiles.iter().enumerate() {
         if state.map.revealed_tiles[idx] {
-            let mut glyph;
+            let glyph;
             let mut fg;
             match tile {
                 Tile::Floor => {
@@ -283,10 +283,7 @@ pub fn new_floor(state: &mut State) {
     position.0 = state.map.rooms[0].center();
     viewer.dirty = true;
     let mut gone = vec![];
-    for (ent, _i) in state.ecs.query_mut::<&Item>() {
-        gone.push(ent);
-    }
-    for (ent, _i) in state.ecs.query_mut::<&Monster>() {
+    for (ent, _i) in state.ecs.query_mut::<&Ephermal>() {
         gone.push(ent);
     }
     for ent in gone {
