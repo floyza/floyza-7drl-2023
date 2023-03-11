@@ -117,9 +117,13 @@ const fn _default_true() -> bool {
 pub struct Player {
     pub current_blueprint: Option<Blueprint>,
     #[serde(skip)] // TODO
-    pub passive_equipment: Vec<Equipment>,
+    /// This contains optional because when effects are executing, we need to `Option::take` the ingredients that we
+    /// are baking with, so that the effect can't go over and stir them up
+    pub passive_equipment: Vec<Option<Equipment>>,
     #[serde(skip)] // TODO
-    pub active_equipment: Vec<Equipment>,
+    /// This contains optional because when effects are executing, we need to `Option::take` the ingredients that we
+    /// are baking with, so that the effect can't go over and stir them up
+    pub active_equipment: Vec<Option<Equipment>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]

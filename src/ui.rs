@@ -80,12 +80,14 @@ pub fn draw_side_info(state: &State, ctx: &mut BTerm) {
     let mut line = 1;
     ctx.print(1, 3 + line, "Actives:");
     for eq in player.active_equipment.iter() {
+        let eq = eq.as_ref().unwrap(); // we are not ever rendering while executing effects
         ctx.print(1, 3 + line, format!("{:?}", eq.ingredients.0));
         line += 1;
     }
     ctx.print(1, 4 + line, "Passives:");
     line += 1;
     for eq in player.passive_equipment.iter() {
+        let eq = eq.as_ref().unwrap(); // we are not ever rendering while executing effects
         ctx.print(1, 4 + line, format!("{:?}", eq.ingredients.0));
         line += 1;
     }

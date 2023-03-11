@@ -107,6 +107,7 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                 Elemental::Fire => |s: &mut State, e, gems: &Vec<Essence>| {
                     let health = s.ecs.query_one_mut::<&mut Health>(e).unwrap();
                     health.hp -= (gems[0].power + 1) * 5;
+                    s.messages.enqueue_message("You toast a guy!");
                 },
                 Elemental::Water => |s: &mut State, e, gems: &Vec<Essence>| {
                     s.ecs
@@ -121,8 +122,8 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                 Elemental::Air => |s: &mut State, e, gems: &Vec<Essence>| {
                     let player_pos = s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
                     let target_pos = s.ecs.query_one_mut::<&mut Position>(e).unwrap();
-                    let offset = normalize_pt(player_pos - target_pos.0);
-                    let target = offset * (gems[0].power + 1);
+                    let offset = normalize_pt(target_pos.0 - player_pos);
+                    let target = target_pos.0 + offset * (gems[0].power + 1);
                     let line = Bresenham::new(target_pos.0, target);
                     let mut success = true;
                     for step in line.skip(1) {

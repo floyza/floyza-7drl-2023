@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 
 use bracket_lib::prelude::*;
 use components::*;
+use equipment::{build_blueprint, Equipment};
 use hecs::{Entity, World};
 use map::{item_fill_map, populate_map};
 use messages::MessageLog;
@@ -191,6 +192,11 @@ fn main() -> BError {
     let mut world = World::new();
     let map = map::Map::new(0, &mut rng);
     let player_pos = map.rooms[0].center();
+    // let bp: Blueprint = serde_json::from_str(
+    //     r##"{ "img": "Sword", "equipment": "Sword", "filled": [[0, {"element":"Air", "power":2}]] }"##,
+    // )
+    // .unwrap();
+    // let equip = build_blueprint(&bp);
     let player_entity = world.spawn((
         Health { max_hp: 80, hp: 80 },
         Position(player_pos),

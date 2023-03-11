@@ -3,7 +3,7 @@ use hecs::With;
 
 use crate::{
     components::*,
-    equipment::{build_blueprint, EquipmentEffect},
+    equipment::{build_blueprint, EquipmentEffect, PassiveEquipment},
     map,
     mapping::Command,
     ui, OperatingMode, State,
@@ -25,18 +25,52 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
                 .query_one_mut::<&Attack>(state.player_entity)
                 .cloned()
             {
+                let mut found_target = None;
                 for entity in state.map.tile_contents[new_idx].iter() {
                     if let Ok((health, name)) = state
                         .ecs
                         .query_one_mut::<With<(&mut Health, &Name), &Monster>>(*entity)
                     {
-                        state.messages.enqueue_message(&format!(
-                            "You hit the {} for {} damage.",
-                            name.0, attacker.damage
-                        ));
-                        health.hp -= attacker.damage;
-                        return true;
+                        found_target = Some(*entity);
+                        break;
                     }
+                }
+                if let Some(target) = found_target {
+                    let (health, name) = state
+                        .ecs
+                        .query_one_mut::<With<(&mut Health, &Name), &Monster>>(target)
+                        .unwrap();
+                    state.messages.enqueue_message(&format!(
+                        "You hit the {} for {} damage.",
+                        name.0, attacker.damage
+                    ));
+                    health.hp -= attacker.damage;
+                    let player = state
+                        .ecs
+                        .query_one_mut::<&mut Player>(state.player_entity)
+                        .unwrap();
+                    let mut equip = vec![];
+                    for (i, eq_maybe) in player.passive_equipment.iter_mut().enumerate() {
+                        let Some(eq) = eq_maybe else {continue};
+                        if matches!(
+                            eq.effect,
+                            EquipmentEffect::Passive(PassiveEquipment::AttackEffect(_))
+                        ) {
+                            equip.push((i, eq_maybe.take().unwrap()));
+                        }
+                    }
+                    for (i, eq) in equip {
+                        let EquipmentEffect::Passive(PassiveEquipment::AttackEffect(eff)) =
+                                eq.effect else {panic!()};
+                        eff(state, target, &eq.ingredients.1);
+                        let player = state
+                            .ecs
+                            .query_one_mut::<&mut Player>(state.player_entity)
+                            .unwrap();
+                        debug_assert!(player.passive_equipment[i].is_none());
+                        player.passive_equipment[i] = Some(eq);
+                    }
+                    return true;
                 }
             }
             if state.map.is_available_exit(new_idx) {
@@ -136,8 +170,8 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
             if bp.filled.len() == bp.img.lookup().gem_spots.len() {
                 let thing = build_blueprint(bp);
                 match thing.effect {
-                    EquipmentEffect::Active(_) => p.active_equipment.push(thing),
-                    EquipmentEffect::Passive(_) => p.passive_equipment.push(thing),
+                    EquipmentEffect::Active(_) => p.active_equipment.push(Some(thing)),
+                    EquipmentEffect::Passive(_) => p.passive_equipment.push(Some(thing)),
                 }
                 state
                     .messages
