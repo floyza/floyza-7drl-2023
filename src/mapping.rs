@@ -22,28 +22,36 @@ pub fn get_command(ctx: &mut BTerm) -> Option<Command> {
             }
         } else {
             match key {
-                VirtualKeyCode::H | VirtualKeyCode::Left => Some(Command::Move {
-                    target: Point::new(-1, 0),
-                }),
-                VirtualKeyCode::L | VirtualKeyCode::Right => Some(Command::Move {
-                    target: Point::new(1, 0),
-                }),
-                VirtualKeyCode::K | VirtualKeyCode::Up => Some(Command::Move {
-                    target: Point::new(0, -1),
-                }),
-                VirtualKeyCode::J | VirtualKeyCode::Down => Some(Command::Move {
-                    target: Point::new(0, 1),
-                }),
-                VirtualKeyCode::Y => Some(Command::Move {
+                VirtualKeyCode::H | VirtualKeyCode::Left | VirtualKeyCode::Numpad4 => {
+                    Some(Command::Move {
+                        target: Point::new(-1, 0),
+                    })
+                }
+                VirtualKeyCode::L | VirtualKeyCode::Right | VirtualKeyCode::Numpad6 => {
+                    Some(Command::Move {
+                        target: Point::new(1, 0),
+                    })
+                }
+                VirtualKeyCode::K | VirtualKeyCode::Up | VirtualKeyCode::Numpad8 => {
+                    Some(Command::Move {
+                        target: Point::new(0, -1),
+                    })
+                }
+                VirtualKeyCode::J | VirtualKeyCode::Down | VirtualKeyCode::Numpad2 => {
+                    Some(Command::Move {
+                        target: Point::new(0, 1),
+                    })
+                }
+                VirtualKeyCode::Y | VirtualKeyCode::Numpad7 => Some(Command::Move {
                     target: Point::new(-1, -1),
                 }),
-                VirtualKeyCode::U => Some(Command::Move {
+                VirtualKeyCode::U | VirtualKeyCode::Numpad9 => Some(Command::Move {
                     target: Point::new(1, -1),
                 }),
-                VirtualKeyCode::B => Some(Command::Move {
+                VirtualKeyCode::B | VirtualKeyCode::Numpad1 => Some(Command::Move {
                     target: Point::new(-1, 1),
                 }),
-                VirtualKeyCode::N => Some(Command::Move {
+                VirtualKeyCode::N | VirtualKeyCode::Numpad3 => Some(Command::Move {
                     target: Point::new(1, 1),
                 }),
                 VirtualKeyCode::G => Some(Command::Grab),
