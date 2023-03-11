@@ -102,7 +102,7 @@ impl Map {
 
         for _i in 0..11 {
             let new_room = loop {
-                let room_center = (rng.range(10, 70), rng.range(10, 40));
+                let room_center = (rng.range(10, WIDTH - 10), rng.range(10, HEIGHT - 10));
                 let width = rng.range(5, 9);
                 let height = rng.range(5, 9);
                 let room = Rect::with_size(
