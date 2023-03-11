@@ -8,7 +8,7 @@ pub const MESSAGE_LOG_HEIGHT: i32 = 5;
 
 pub fn draw_corners(state: &State, ctx: &mut BTerm) {
     ctx.set(
-        RIGHT_SIDEBAR_WIDTH,
+        RIGHT_SIDEBAR_WIDTH - 1,
         state.size.y - MESSAGE_LOG_HEIGHT,
         RGB::named(WHITE),
         RGB::named(BLACK),
@@ -34,7 +34,7 @@ pub fn draw_messages(state: &State, ctx: &mut BTerm) {
     {
         ctx.print(0, state.size.y - 1 - i as i32, message);
     }
-    for x in RIGHT_SIDEBAR_WIDTH + 1..state.size.x - LEFT_SIDEBAR_WIDTH {
+    for x in RIGHT_SIDEBAR_WIDTH..state.size.x - LEFT_SIDEBAR_WIDTH {
         ctx.set(
             x,
             state.size.y - MESSAGE_LOG_HEIGHT,
@@ -77,7 +77,7 @@ pub fn draw_side_info(state: &State, ctx: &mut BTerm) {
 
     for y in 0..state.size.y {
         ctx.set(
-            RIGHT_SIDEBAR_WIDTH,
+            RIGHT_SIDEBAR_WIDTH - 1,
             y,
             RGB::named(WHITE),
             RGB::named(BLACK),

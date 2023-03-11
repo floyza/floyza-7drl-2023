@@ -1,10 +1,17 @@
 use std::collections::BTreeMap;
 
-use crate::components::*;
+use crate::{components::*, ui, WINDOW_HEIGHT, WINDOW_WIDTH};
 use bracket_lib::prelude::*;
 use hecs::Entity;
 
 use crate::State;
+
+pub const MAP_UI_DIM: Rect = Rect {
+    x1: ui::LEFT_SIDEBAR_WIDTH,
+    x2: WINDOW_WIDTH - ui::RIGHT_SIDEBAR_WIDTH,
+    y1: 0,
+    y2: WINDOW_HEIGHT - ui::MESSAGE_LOG_HEIGHT,
+};
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum Tile {
@@ -218,42 +225,44 @@ pub fn item_fill_map(state: &mut State) {
 }
 
 pub fn draw_map(state: &State, ctx: &mut BTerm) {
-    let mut y = 0;
-    let mut x = 0;
-    for (idx, tile) in state.map.tiles.iter().enumerate() {
-        if state.map.revealed_tiles[idx] {
-            let glyph;
-            let mut fg;
-            match tile {
-                Tile::Floor => {
-                    glyph = to_cp437('.');
-                    fg = RGB::from_f32(0.0, 0.5, 0.5);
+    let mut query = state
+        .ecs
+        .query_one::<&Position>(state.player_entity)
+        .unwrap();
+    let player_pos = query.get().unwrap().0;
+    let offset = player_pos - MAP_UI_DIM.center();
+    MAP_UI_DIM.for_each(|pt| {
+        let idx = state.map.point2d_to_index(pt + offset);
+        if let Some(tile) = state.map.tiles.get(idx) {
+            if state.map.revealed_tiles[idx] {
+                let glyph;
+                let mut fg;
+                match tile {
+                    Tile::Floor => {
+                        glyph = to_cp437('.');
+                        fg = RGB::from_f32(0.0, 0.5, 0.5);
+                    }
+                    Tile::Wall => {
+                        glyph = to_cp437('#');
+                        fg = RGB::from_f32(0., 1., 0.);
+                    }
+                    Tile::Stairs => {
+                        glyph = to_cp437('>');
+                        fg = RGB::from_hex("#da2c43").unwrap();
+                    }
                 }
-                Tile::Wall => {
-                    glyph = to_cp437('#');
-                    fg = RGB::from_f32(0., 1., 0.);
+                if !state.map.visible_tiles[idx] {
+                    fg = fg.to_greyscale();
                 }
-                Tile::Stairs => {
-                    glyph = to_cp437('>');
-                    fg = RGB::from_hex("#da2c43").unwrap();
-                }
+                ctx.set(pt.x, pt.y, fg, RGB::from_f32(0., 0., 0.), glyph);
             }
-            if !state.map.visible_tiles[idx] {
-                fg = fg.to_greyscale();
-            }
-            ctx.set(x, y, fg, RGB::from_f32(0., 0., 0.), glyph);
         }
-        x += 1;
-        if x >= state.map.width {
-            x = 0;
-            y += 1;
-        }
-    }
+    });
 
-    draw_entities(state, ctx)
+    draw_entities(state, ctx, offset)
 }
 
-fn draw_entities(state: &State, ctx: &mut BTerm) {
+fn draw_entities(state: &State, ctx: &mut BTerm, offset: Point) {
     let mut renderings: BTreeMap<i32, Vec<(Renderable, Point)>> = BTreeMap::new();
     for (_id, (pos, render)) in state.ecs.query::<(&Position, &Renderable)>().iter() {
         if state.map.visible_tiles[state.map.point2d_to_index(pos.0)] {
@@ -268,7 +277,10 @@ fn draw_entities(state: &State, ctx: &mut BTerm) {
     }
     for (_layer_id, layer) in renderings {
         for (render, pos) in layer {
-            ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
+            let pos = pos - offset;
+            if MAP_UI_DIM.point_in_rect(pos) {
+                ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
+            }
         }
     }
 }

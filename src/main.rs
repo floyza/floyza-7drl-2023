@@ -23,6 +23,9 @@ pub mod skill;
 pub mod systems;
 pub mod ui;
 
+pub const WINDOW_WIDTH: i32 = 80;
+pub const WINDOW_HEIGHT: i32 = 50;
+
 pub struct State {
     pub size: Point,
     pub ecs: World,
