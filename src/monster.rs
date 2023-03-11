@@ -100,6 +100,7 @@ pub fn spawn_monster(state: &mut State, dl: i32, pos: Point) -> Entity {
                 Position(pos),
                 Ephermal,
                 Blocker {},
+                Rank(dl),
             ),
         )
         .unwrap();

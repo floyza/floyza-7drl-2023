@@ -15,7 +15,7 @@ pub fn spawn_item(state: &mut State, dl: i32, pos: Point) -> Entity {
     }
     state
         .ecs
-        .insert(entity, (Item {}, Position(pos), Ephermal))
+        .insert(entity, (Item {}, Position(pos), Ephermal, Rank(dl)))
         .unwrap();
     entity
 }

@@ -21,6 +21,7 @@ pub enum Component {
     Blueprint(Blueprint),
     Ephermal(Ephermal),
     Elemental(Elemental),
+    Rank(Rank),
 }
 
 pub trait IsComponent: Debug {}
@@ -44,6 +45,7 @@ impl Component {
             Component::Blueprint(c) => ecs.insert_one(entity, c),
             Component::Ephermal(c) => ecs.insert_one(entity, c),
             Component::Elemental(c) => ecs.insert_one(entity, c),
+            Component::Rank(c) => ecs.insert_one(entity, c),
         }
     }
     pub fn apply(&self, mut f: impl FnMut(&dyn IsComponent)) {
@@ -63,6 +65,7 @@ impl Component {
             Component::Blueprint(c) => f(c),
             Component::Ephermal(c) => f(c),
             Component::Elemental(c) => f(c),
+            Component::Rank(c) => f(c),
         }
     }
 }

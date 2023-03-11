@@ -58,5 +58,8 @@ pub fn get_entity_components(entity: hecs::EntityRef<'_>) -> Vec<components_serd
     if let Some(x) = entity.get::<&Elemental>() {
         c.push(Component::Elemental((*x).clone()));
     }
+    if let Some(x) = entity.get::<&Rank>() {
+        c.push(Component::Rank((*x).clone()));
+    }
     c
 }

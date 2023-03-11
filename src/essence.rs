@@ -1,6 +1,14 @@
+use serde::{Deserialize, Serialize};
+
 use crate::{components::*, State};
 
-pub fn gain_essence(state: &mut State, essence: Elemental) {
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Essence {
+    pub element: Elemental,
+    pub power: i32,
+}
+
+pub fn gain_essence(state: &mut State, essence: Essence) {
     let p = state
         .ecs
         .query_one_mut::<&mut Player>(state.player_entity)
@@ -12,7 +20,7 @@ pub fn gain_essence(state: &mut State, essence: Elemental) {
             bp.filled.push((idx, essence.clone()));
             state.messages.enqueue_message(&format!(
                 "Zoop! {} essence is sucked into your blueprint.",
-                essence
+                essence.element
             ));
             return;
         }

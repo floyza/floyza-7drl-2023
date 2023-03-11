@@ -113,11 +113,10 @@ pub fn draw_current_blueprint(state: &State, ctx: &mut BTerm) {
         ctx.render_xp_sprite(&bpi.img, sidebar_x + offset_x, offset_y);
         for slot in bp.filled.iter() {
             let gem = bpi.gem_spots[slot.0];
-            let color = match slot.1 {
+            let color = match slot.1.element {
                 Elemental::Air => RGB::named(SKYBLUE),
                 Elemental::Water => RGB::named(DARKBLUE),
                 Elemental::Fire => RGB::named(RED),
-                Elemental::Earth => RGB::named(BROWN1),
             };
             ctx.set(
                 sidebar_x + offset_x + gem.x,
@@ -208,7 +207,7 @@ pub fn update_confirmation_ui(
 
 pub fn draw_confirmation_ui(ui_state: &ConfUIState, ctx: &mut BTerm) {
     let width = ui_state.query.len() as i32 + 4;
-    let height = 5;
+    let height = 4;
     let x = (WINDOW_WIDTH - width) / 2;
     let y = (WINDOW_HEIGHT - height) / 2;
     ctx.draw_box(x, y, width, height, RGB::named(WHITE), RGB::named(BLACK));
