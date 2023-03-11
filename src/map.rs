@@ -83,16 +83,19 @@ impl BaseMap for Map {
 
 impl Map {
     pub fn new(dl: i32, rng: &mut RandomNumberGenerator) -> Map {
+        const WIDTH: i32 = 70;
+        const HEIGHT: i32 = 60;
+        const SIZE: usize = (WIDTH * HEIGHT) as usize;
         let mut map = Map {
             difficulty_level: dl,
-            tiles: vec![Tile::Wall; 80 * 50],
+            tiles: vec![Tile::Wall; SIZE],
             rooms: Vec::new(),
-            width: 80,
-            height: 50,
-            visible_tiles: vec![false; 80 * 50],
-            revealed_tiles: vec![false; 80 * 50],
-            blocked_tiles: vec![false; 80 * 50],
-            tile_contents: vec![Vec::new(); 80 * 50],
+            width: WIDTH,
+            height: HEIGHT,
+            visible_tiles: vec![false; SIZE],
+            revealed_tiles: vec![false; SIZE],
+            blocked_tiles: vec![false; SIZE],
+            tile_contents: vec![Vec::new(); SIZE],
         };
 
         let mut rooms = Vec::<Rect>::new();
