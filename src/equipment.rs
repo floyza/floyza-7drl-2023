@@ -206,7 +206,7 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
             let eff = match gems[0].element {
                 Elemental::Fire => |s: &mut State, e, gems: &Vec<Essence>| {
                     let health = s.ecs.query_one_mut::<&mut Health>(e).unwrap();
-                    health.hp -= (gems[0].power + 1) * 5;
+                    health.hp -= (gems[0].power + 1) * 2;
                 },
                 Elemental::Water => |s: &mut State, e, gems: &Vec<Essence>| {
                     s.ecs
@@ -273,7 +273,7 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                         let dest = pt + normalize_pt(player_pos - pt) * (gems[0].power + 1);
                         push_entity_in_line_to(s, e, dest);
                         let health = s.ecs.query_one_mut::<&mut Health>(e).unwrap();
-                        health.hp -= (gems[0].power + 1) * 5;
+                        health.hp -= (gems[0].power + 1) * 1;
                     }
                 },
                 Elemental::Water => |s: &mut State, pt, _gems: &Vec<Essence>| {

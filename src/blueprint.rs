@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 pub enum BPImage {
     Sword,
     Armor,
+    Grapple,
+    Gun,
 }
 
 impl BPImage {
@@ -24,6 +26,8 @@ pub struct BPIData {
 
 embedded_resource!(BP_SWORD, "../assets/sword.xp");
 embedded_resource!(BP_ARMOR, "../assets/armor.xp");
+embedded_resource!(BP_HOOK, "../assets/grappling-hook.xp");
+embedded_resource!(BP_GUN, "../assets/elemental-gun.xp");
 
 lazy_static! {
     pub static ref BLUEPRINTS: Mutex<HashMap<BPImage, BPIData>> = Mutex::new(HashMap::new());
@@ -32,6 +36,8 @@ lazy_static! {
 pub fn load_blueprints() {
     link_resource!(BP_SWORD, "../assets/sword.xp");
     link_resource!(BP_ARMOR, "../assets/armor.xp");
+    link_resource!(BP_HOOK, "../assets/grappling-hook.xp");
+    link_resource!(BP_GUN, "../assets/elemental-gun.xp");
     let mut map = HashMap::new();
     {
         let xp = XpFile::from_resource("../assets/sword.xp").unwrap();
@@ -50,6 +56,26 @@ pub fn load_blueprints() {
             BPIData {
                 img: xp,
                 gem_spots: vec![Point::new(8, 15)],
+            },
+        );
+    }
+    {
+        let xp = XpFile::from_resource("../assets/grappling-hook.xp").unwrap();
+        map.insert(
+            BPImage::Grapple,
+            BPIData {
+                img: xp,
+                gem_spots: vec![Point::new(4, 8)],
+            },
+        );
+    }
+    {
+        let xp = XpFile::from_resource("../assets/elemental-gun.xp").unwrap();
+        map.insert(
+            BPImage::Gun,
+            BPIData {
+                img: xp,
+                gem_spots: vec![Point::new(3, 15)],
             },
         );
     }

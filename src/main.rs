@@ -229,18 +229,18 @@ fn main() -> BError {
     let mut world = World::new();
     let map = map::Map::new(0, &mut rng);
     let player_pos = map.rooms[0].center();
-    let bp: Blueprint = serde_json::from_str(
-        r##"{ "img": "Sword", "equipment": "Grapple", "filled": [[0, {"element":"Water", "power":2}]] }"##,
-    )
-    .unwrap();
-    let equip = build_blueprint(&bp);
+    // let bp: Blueprint = serde_json::from_str(
+    //     r##"{ "img": "Sword", "equipment": "Grapple", "filled": [[0, {"element":"Water", "power":2}]] }"##,
+    // )
+    // .unwrap();
+    // let equip = build_blueprint(&bp);
     let player_entity = world.spawn((
         Health { max_hp: 30, hp: 30 },
         Position(player_pos),
         Player {
             current_blueprint: None,
             passive_equipment: vec![],
-            active_equipment: vec![Some(equip)],
+            active_equipment: vec![],
         },
         Viewer {
             visible_tiles: Vec::new(),

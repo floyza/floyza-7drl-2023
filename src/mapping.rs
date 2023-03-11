@@ -59,7 +59,7 @@ pub fn get_command(ctx: &mut BTerm) -> Option<Command> {
                 VirtualKeyCode::G => Some(Command::Grab),
                 VirtualKeyCode::I => Some(Command::OpenInventory),
                 VirtualKeyCode::M => Some(Command::OpenMessageLog),
-                VirtualKeyCode::X => Some(Command::OpenExamine),
+                VirtualKeyCode::X | VirtualKeyCode::Slash => Some(Command::OpenExamine),
                 VirtualKeyCode::A => Some(Command::CreateItem),
                 VirtualKeyCode::Period => Some(Command::Wait),
                 VirtualKeyCode::Escape | VirtualKeyCode::Q => Some(Command::Back),

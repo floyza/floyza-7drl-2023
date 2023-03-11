@@ -4,7 +4,7 @@
       [
         { "Name": "Blazepup" },
         {
-          "Health": { "max_hp": 30 }
+          "Health": { "max_hp": 6 }
         },
         { "Attack": { "damage": 2 } },
         { "Viewer": { "range": 6 } },
@@ -23,7 +23,7 @@
       [
         { "Name": "Gustspitter" },
         {
-          "Health": { "max_hp": 20 }
+          "Health": { "max_hp": 3 }
         },
         { "Attack": { "damage": 2 } },
         { "Viewer": { "range": 8 } },
@@ -47,7 +47,7 @@
       [
         { "Name": "Icewalker" },
         {
-          "Health": { "max_hp": 15 }
+          "Health": { "max_hp": 3 }
         },
         { "Attack": { "damage": 4 } },
         { "Viewer": { "range": 6 } },
@@ -113,7 +113,7 @@
         },
         {
           "Blueprint": {
-            "img": "Sword",
+            "img": "Grapple",
             "equipment": "Grapple"
           }
         }
