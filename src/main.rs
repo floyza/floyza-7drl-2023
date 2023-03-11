@@ -235,7 +235,7 @@ fn main() -> BError {
     .unwrap();
     let equip = build_blueprint(&bp);
     let player_entity = world.spawn((
-        Health { max_hp: 80, hp: 80 },
+        Health { max_hp: 30, hp: 30 },
         Position(player_pos),
         Player {
             current_blueprint: None,
@@ -258,7 +258,7 @@ fn main() -> BError {
         },
         Name("Bob".to_string()),
         Grower::Empty,
-        Attack { damage: 10 },
+        Attack { damage: 3 },
     ));
 
     let mut state = State {

@@ -21,7 +21,7 @@ pub enum Tile {
 }
 
 pub struct Map {
-    pub difficulty_level: i32,
+    pub depth: i32,
     pub tiles: Vec<Tile>,
     pub width: i32,
     pub height: i32,
@@ -87,7 +87,7 @@ impl Map {
         const HEIGHT: i32 = 60;
         const SIZE: usize = (WIDTH * HEIGHT) as usize;
         let mut map = Map {
-            difficulty_level: dl,
+            depth: dl,
             tiles: vec![Tile::Wall; SIZE],
             rooms: Vec::new(),
             width: WIDTH,
@@ -198,7 +198,15 @@ pub fn populate_map(state: &mut State) {
         }
     }
     for pt in new_monsters {
-        let entity = crate::monster::spawn_monster(state, state.map.difficulty_level, pt);
+        let edl;
+        if state.map.depth > 4 {
+            edl = 2;
+        } else if state.map.depth % 2 == 1 {
+            edl = state.map.depth / 2 + state.rng.range(0, 2);
+        } else {
+            edl = state.map.depth / 2;
+        }
+        let entity = crate::monster::spawn_monster(state, edl, pt);
         state.turn_order.push_back(entity);
     }
 }
@@ -223,7 +231,15 @@ pub fn item_fill_map(state: &mut State) {
         }
     }
     for pt in new_items {
-        crate::item::spawn_item(state, state.map.difficulty_level, pt);
+        let edl;
+        if state.map.depth > 4 {
+            edl = 2;
+        } else if state.map.depth % 2 == 1 {
+            edl = state.map.depth / 2 + state.rng.range(0, 2);
+        } else {
+            edl = state.map.depth / 2;
+        }
+        crate::item::spawn_item(state, edl, pt);
     }
 }
 
@@ -300,14 +316,15 @@ fn draw_entities(state: &State, ctx: &mut BTerm, offset: Point) {
 }
 
 pub fn new_floor(state: &mut State) {
-    let new_map = Map::new(state.map.difficulty_level + 1, &mut state.rng);
+    let new_map = Map::new(state.map.depth + 1, &mut state.rng);
     state.map = new_map;
-    let (position, viewer) = state
+    let (position, viewer, health) = state
         .ecs
-        .query_one_mut::<(&mut Position, &mut Viewer)>(state.player_entity)
+        .query_one_mut::<(&mut Position, &mut Viewer, &mut Health)>(state.player_entity)
         .unwrap();
     position.0 = state.map.rooms[0].center();
     viewer.dirty = true;
+    health.hp = health.max_hp;
     let mut gone = vec![];
     for (ent, _i) in state.ecs.query_mut::<&Ephermal>() {
         gone.push(ent);

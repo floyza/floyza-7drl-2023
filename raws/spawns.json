@@ -6,8 +6,8 @@
         {
           "Health": { "max_hp": 30 }
         },
-        { "Attack": { "damage": 10 } },
-        { "Viewer": { "range": 8 } },
+        { "Attack": { "damage": 2 } },
+        { "Viewer": { "range": 6 } },
         {
           "Renderable": {
             "glyph": "h",
@@ -25,7 +25,7 @@
         {
           "Health": { "max_hp": 20 }
         },
-        { "Attack": { "damage": 8 } },
+        { "Attack": { "damage": 2 } },
         { "Viewer": { "range": 8 } },
         {
           "Renderable": {
@@ -42,6 +42,25 @@
           "Skilled": {
             "skills": [[1.0, "ShootBow"]]
           }
+        }
+      ],
+      [
+        { "Name": "Icewalker" },
+        {
+          "Health": { "max_hp": 15 }
+        },
+        { "Attack": { "damage": 4 } },
+        { "Viewer": { "range": 6 } },
+        {
+          "Renderable": {
+            "glyph": "z",
+            "fg": "#20b2aa",
+            "bg": "#000000",
+            "layer": 1
+          }
+        },
+        {
+          "Elemental": "Water"
         }
       ]
     ]
