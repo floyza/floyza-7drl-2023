@@ -10,6 +10,7 @@ use crate::State;
 pub enum Tile {
     Wall,
     Floor,
+    Stairs,
 }
 
 pub struct Map {
@@ -17,7 +18,6 @@ pub struct Map {
     pub tiles: Vec<Tile>,
     pub width: i32,
     pub height: i32,
-    pub stairs: usize,
     pub rooms: Vec<Rect>,
     pub visible_tiles: Vec<bool>,
     pub revealed_tiles: Vec<bool>,
@@ -80,7 +80,6 @@ impl Map {
             difficulty_level: dl,
             tiles: vec![Tile::Wall; 80 * 50],
             rooms: Vec::new(),
-            stairs: 0,
             width: 80,
             height: 50,
             visible_tiles: vec![false; 80 * 50],
@@ -155,7 +154,8 @@ impl Map {
             }
         }
 
-        map.stairs = map.point2d_to_index(random_room_point(&map, rng));
+        let idx = map.point2d_to_index(random_room_point(&map, rng));
+        map.tiles[idx] = Tile::Stairs;
         map
     }
 
@@ -233,10 +233,10 @@ pub fn draw_map(state: &State, ctx: &mut BTerm) {
                     glyph = to_cp437('#');
                     fg = RGB::from_f32(0., 1., 0.);
                 }
-            }
-            if idx == state.map.stairs {
-                glyph = to_cp437('>');
-                fg = RGB::from_hex("#da2c43").unwrap();
+                Tile::Stairs => {
+                    glyph = to_cp437('>');
+                    fg = RGB::from_hex("#da2c43").unwrap();
+                }
             }
             if !state.map.visible_tiles[idx] {
                 fg = fg.to_greyscale();

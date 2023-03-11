@@ -8,4 +8,3 @@ Must be updated between picking up an item and messing around with tile_contents
 * Layers
 - 0 :: items
 - 1 :: monsters, player
-- 10 :: stairs

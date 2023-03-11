@@ -214,6 +214,9 @@ pub fn draw_examine_ui(ui_state: &ExamineUIState, state: &State, ctx: &mut BTerm
             map::Tile::Floor => {
                 ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Floor");
             }
+            map::Tile::Stairs => {
+                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Stairs");
+            }
         }
     } else if state.map.revealed_tiles[idx] {
         match state.map.tiles[idx] {
@@ -222,6 +225,9 @@ pub fn draw_examine_ui(ui_state: &ExamineUIState, state: &State, ctx: &mut BTerm
             }
             map::Tile::Floor => {
                 ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Floor");
+            }
+            map::Tile::Stairs => {
+                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Stairs");
             }
         }
     } else {

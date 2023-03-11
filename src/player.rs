@@ -113,7 +113,7 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
                 .query_one_mut::<&Position>(state.player_entity)
                 .unwrap();
             let idx = state.map.point2d_to_index(player_pos.0);
-            if idx == state.map.stairs {
+            if state.map.tiles[idx] == map::Tile::Stairs {
                 state.messages.enqueue_message("You descend the stairs.");
                 map::new_floor(state);
                 return true;
