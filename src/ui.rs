@@ -32,7 +32,11 @@ pub fn draw_messages(state: &State, ctx: &mut BTerm) {
         .take(MESSAGE_LOG_HEIGHT as usize - 1)
         .enumerate()
     {
-        ctx.print(0, state.size.y - 1 - i as i32, message);
+        ctx.print(
+            RIGHT_SIDEBAR_WIDTH + 1,
+            state.size.y - 1 - i as i32,
+            message,
+        );
     }
     for x in RIGHT_SIDEBAR_WIDTH..state.size.x - LEFT_SIDEBAR_WIDTH {
         ctx.set(
@@ -241,6 +245,7 @@ pub fn update_examine_ui(
 }
 
 pub fn draw_examine_ui(ui_state: &ExamineUIState, state: &State, ctx: &mut BTerm) {
+    // TODO fix this to move based on map pos
     ctx.set(
         ui_state.point.x,
         ui_state.point.y,
