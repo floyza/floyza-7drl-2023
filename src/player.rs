@@ -121,6 +121,17 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
             }
             false
         }
+        Command::CreateItem => {
+            let p = state
+                .ecs
+                .query_one_mut::<&mut Player>(state.player_entity)
+                .unwrap();
+            let Some(p) = &p.current_blueprint else { return false };
+            if p.filled.len() == p.img.lookup().gem_spots.len() {
+                todo!();
+            }
+            todo!();
+        }
         _ => false,
     }
 }

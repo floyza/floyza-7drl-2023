@@ -12,6 +12,7 @@ pub mod blueprint;
 pub mod components;
 pub mod components_serde;
 pub mod debug;
+pub mod equipment;
 pub mod essence;
 pub mod item;
 pub mod map;

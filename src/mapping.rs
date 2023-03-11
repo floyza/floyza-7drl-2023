@@ -11,6 +11,7 @@ pub enum Command {
     OpenExamine,
     DescendStairs,
     Select,
+    CreateItem,
 }
 
 pub fn get_command(ctx: &mut BTerm) -> Option<Command> {
@@ -58,6 +59,7 @@ pub fn get_command(ctx: &mut BTerm) -> Option<Command> {
                 VirtualKeyCode::I => Some(Command::OpenInventory),
                 VirtualKeyCode::M => Some(Command::OpenMessageLog),
                 VirtualKeyCode::X => Some(Command::OpenExamine),
+                VirtualKeyCode::A => Some(Command::CreateItem),
                 VirtualKeyCode::Period => Some(Command::Wait),
                 VirtualKeyCode::Escape | VirtualKeyCode::Q => Some(Command::Back),
                 VirtualKeyCode::Return => Some(Command::Select),

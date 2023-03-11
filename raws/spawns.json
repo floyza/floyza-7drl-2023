@@ -60,7 +60,8 @@
         },
         {
           "Blueprint": {
-            "img": "Sword"
+            "img": "Sword",
+            "equipment": "Sword"
           }
         }
       ]
@@ -78,7 +79,8 @@
         },
         {
           "Blueprint": {
-            "img": "Sword"
+            "img": "Sword",
+            "equipment": "Sword"
           }
         }
       ]

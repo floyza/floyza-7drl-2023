@@ -2,7 +2,7 @@ use bracket_lib::prelude::*;
 use hecs::Entity;
 use serde::{Deserialize, Serialize};
 
-use crate::{blueprint::BPImage, skill::Skill};
+use crate::{blueprint::BPImage, equipment::EquipmentType, skill::Skill};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(from = "HealthHelper")]
@@ -149,6 +149,7 @@ pub struct Blocker {}
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Blueprint {
     pub img: BPImage,
+    pub equipment: EquipmentType,
     #[serde(default)]
     pub filled: Vec<(usize, Elemental)>,
 }
