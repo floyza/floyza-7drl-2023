@@ -4,7 +4,13 @@ use bracket_lib::prelude::*;
 use hecs::Entity;
 use serde::{Deserialize, Serialize};
 
-use crate::{components::*, essence::Essence, math::normalize_pt, State};
+use crate::{
+    components::*,
+    essence::Essence,
+    math::normalize_pt,
+    util::{get_thing_with_thing_at_pos, push_entity_in_line_to},
+    State,
+};
 
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum EquipmentType {
@@ -76,9 +82,9 @@ fn armor_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
 fn grapple_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
     builder.fg(RGB::named(WHITE)).line_wrap("Yank");
     colorize_print_element(
-        "enemies with a shotgun blast of hooks",
-        "one enemy all the way to you",
-        "enemies chain-lightning style",
+        "an enemy, damaging it as you do so.",
+        "one enemy all the way to you.",
+        "enemies chain-lightning style.",
         ess[0].clone(),
         builder,
     );
@@ -92,7 +98,7 @@ pub enum EquipmentEffect {
 
 #[derive(Clone)]
 pub enum ActiveEquipment {
-    TargetEffect(fn(&mut State, Entity, &Vec<Essence>)),
+    TargetEffect(fn(&mut State, Point, &Vec<Essence>)),
 }
 
 impl fmt::Debug for ActiveEquipment {
@@ -116,6 +122,21 @@ impl fmt::Debug for PassiveEquipment {
             Self::GotHitEffect(_) => write!(f, "GotHitEffect"),
         }
     }
+}
+
+pub fn execute_active_target(state: &mut State, ability_idx: usize, target: Point) {
+    let player = state
+        .ecs
+        .query_one_mut::<&mut Player>(state.player_entity)
+        .unwrap();
+    let equip = player.active_equipment[ability_idx].take().unwrap();
+    let EquipmentEffect::Active(ActiveEquipment::TargetEffect(eff)) = equip.effect else {panic!()};
+    eff(state, target, &equip.ingredients.1);
+    let player = state
+        .ecs
+        .query_one_mut::<&mut Player>(state.player_entity)
+        .unwrap();
+    player.active_equipment[ability_idx] = Some(equip);
 }
 
 pub fn execute_attack_effects(state: &mut State, target: Entity) {
@@ -199,23 +220,10 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                 },
                 Elemental::Air => |s: &mut State, e, gems: &Vec<Essence>| {
                     let player_pos = s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
-                    let target_pos = s.ecs.query_one_mut::<&mut Position>(e).unwrap();
-                    let offset = normalize_pt(target_pos.0 - player_pos);
-                    let target = target_pos.0 + offset * (gems[0].power + 1);
-                    let line = Bresenham::new(target_pos.0, target);
-                    let mut success = true;
-                    for step in line.skip(1) {
-                        let idx = s.map.point2d_to_index(step);
-                        if !s.map.is_available_exit(idx) {
-                            success = false;
-                            break;
-                        }
-                        target_pos.0 = step;
-                    }
-                    let idx = s.map.point2d_to_index(target);
-                    if success && s.map.is_available_exit(idx) {
-                        target_pos.0 = target;
-                    }
+                    let target_pos = s.ecs.query_one_mut::<&Position>(e).unwrap().0;
+                    let dest =
+                        target_pos + normalize_pt(target_pos - player_pos) * (gems[0].power + 1);
+                    push_entity_in_line_to(s, e, dest);
                 },
             };
             let eff = EquipmentEffect::Passive(PassiveEquipment::GotHitEffect(eff));
@@ -243,23 +251,10 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                 },
                 Elemental::Air => |s: &mut State, e, gems: &Vec<Essence>| {
                     let player_pos = s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
-                    let target_pos = s.ecs.query_one_mut::<&mut Position>(e).unwrap();
-                    let offset = normalize_pt(target_pos.0 - player_pos);
-                    let target = target_pos.0 + offset * (gems[0].power + 1);
-                    let line = Bresenham::new(target_pos.0, target);
-                    let mut success = true;
-                    for step in line.skip(1) {
-                        let idx = s.map.point2d_to_index(step);
-                        if !s.map.is_available_exit(idx) {
-                            success = false;
-                            break;
-                        }
-                        target_pos.0 = step;
-                    }
-                    let idx = s.map.point2d_to_index(target);
-                    if success && s.map.is_available_exit(idx) {
-                        target_pos.0 = target;
-                    }
+                    let target_pos = s.ecs.query_one_mut::<&Position>(e).unwrap().0;
+                    let dest =
+                        target_pos + normalize_pt(target_pos - player_pos) * (gems[0].power + 1);
+                    push_entity_in_line_to(s, e, dest);
                 },
             };
             let eff = EquipmentEffect::Passive(PassiveEquipment::AttackEffect(eff));
@@ -271,9 +266,55 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
         EquipmentType::Grapple => {
             debug_assert!(gems.len() == 1);
             let eff = match gems[0].element {
-                Elemental::Fire => |s: &mut State, e, gems: &Vec<Essence>| {},
-                Elemental::Water => todo!(),
-                Elemental::Air => todo!(),
+                Elemental::Fire => |s: &mut State, pt, gems: &Vec<Essence>| {
+                    if let Some(e) = get_thing_with_thing_at_pos::<&Monster>(s, pt) {
+                        let player_pos =
+                            s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
+                        let dest = pt + normalize_pt(player_pos - pt) * (gems[0].power + 1);
+                        push_entity_in_line_to(s, e, dest);
+                        let health = s.ecs.query_one_mut::<&mut Health>(e).unwrap();
+                        health.hp -= (gems[0].power + 1) * 5;
+                    }
+                },
+                Elemental::Water => |s: &mut State, pt, _gems: &Vec<Essence>| {
+                    if let Some(e) = get_thing_with_thing_at_pos::<&Monster>(s, pt) {
+                        let player_pos =
+                            s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
+                        push_entity_in_line_to(s, e, player_pos);
+                    }
+                },
+                Elemental::Air => |s: &mut State, mut pt, gems: &Vec<Essence>| {
+                    let player_pos = s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
+                    let mut targets = Vec::new();
+                    if let Some(mut target) = get_thing_with_thing_at_pos::<&Monster>(s, pt) {
+                        let dest = pt + normalize_pt(player_pos - pt) * (gems[0].power + 1);
+                        targets.push((target, dest));
+                        'chain: loop {
+                            for x in -2..=2 {
+                                for y in -2..=2 {
+                                    if let Some(potential) = get_thing_with_thing_at_pos::<&Monster>(
+                                        s,
+                                        pt + Point::new(x, y),
+                                    ) {
+                                        if targets.iter().all(|(e, _)| *e != potential) {
+                                            pt += Point::new(x, y);
+                                            target = potential;
+                                            let dest = pt
+                                                + normalize_pt(player_pos - pt)
+                                                    * (gems[0].power + 1);
+                                            targets.push((target, dest));
+                                            continue 'chain;
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    for (e, dest) in targets {
+                        push_entity_in_line_to(s, e, dest);
+                    }
+                },
             };
             let eff = EquipmentEffect::Active(ActiveEquipment::TargetEffect(eff));
             return Equipment {

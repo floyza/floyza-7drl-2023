@@ -79,16 +79,18 @@ pub fn draw_side_info(state: &State, ctx: &mut BTerm) {
 
     let mut line = 1;
     ctx.print(1, 3 + line, "Actives:");
-    for eq in player.active_equipment.iter() {
+    line += 1;
+    for (i, eq) in player.active_equipment.iter().enumerate() {
         let eq = eq.as_ref().unwrap(); // we are not ever rendering while executing effects
-        ctx.print(1, 3 + line, format!("{:?}", eq.ingredients.0));
+        ctx.print(1, 3 + line, format!("{}){:?}", i + 1, eq.ingredients.0));
         line += 1;
     }
-    ctx.print(1, 5 + line, "Passives:");
+    line += 1;
+    ctx.print(1, 3 + line, "Passives:");
     line += 1;
     for eq in player.passive_equipment.iter() {
         let eq = eq.as_ref().unwrap(); // we are not ever rendering while executing effects
-        ctx.print(1, 5 + line, format!("{:?}", eq.ingredients.0));
+        ctx.print(1, 3 + line, format!("{:?}", eq.ingredients.0));
         line += 1;
     }
 
@@ -374,7 +376,17 @@ pub struct ExamineUIState {
     pub point: Point,
 }
 
-pub fn update_examine_ui(mut ui_state: ExamineUIState, command: Command) -> (bool, ExamineUIState) {
+#[derive(Debug, Clone, PartialEq)]
+pub enum ExamineUIRes {
+    Select(Point),
+    Done,
+}
+
+pub fn update_examine_ui(
+    mut ui_state: ExamineUIState,
+    state: &mut State,
+    command: Command,
+) -> (Option<ExamineUIRes>, ExamineUIState) {
     match command {
         Command::Move { target: offset } => {
             let n = ui_state.point + offset;
@@ -387,11 +399,24 @@ pub fn update_examine_ui(mut ui_state: ExamineUIState, command: Command) -> (boo
             }
         }
         Command::Back => {
-            return (true, ui_state);
+            return (Some(ExamineUIRes::Done), ui_state);
+        }
+        Command::Select => {
+            let player_pos = state
+                .ecs
+                .query_one_mut::<&Position>(state.player_entity)
+                .unwrap()
+                .0;
+            let offset = player_pos - map::MAP_UI_DIM.center();
+            let top_left = Point::new(map::MAP_UI_DIM.x1, map::MAP_UI_DIM.y1);
+            return (
+                Some(ExamineUIRes::Select(ui_state.point + top_left + offset)),
+                ui_state,
+            );
         }
         _ => {}
     }
-    return (false, ui_state);
+    return (None, ui_state);
 }
 
 pub fn draw_examine_ui(ui_state: &ExamineUIState, state: &State, ctx: &mut BTerm) {

@@ -160,6 +160,24 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
                 .enqueue_message("Slots not full: cannot build yet.");
             false
         }
+        Command::UseActive(action_idx) => {
+            let p = state
+                .ecs
+                .query_one_mut::<&mut Player>(state.player_entity)
+                .unwrap();
+            if let Some(_) = p.active_equipment.get(action_idx as usize - 1) {
+                state.operating_mode = OperatingMode::EquipmentTargetting {
+                    state: ui::ExamineUIState {
+                        point: Point::new(
+                            map::MAP_UI_DIM.width() / 2,
+                            map::MAP_UI_DIM.height() / 2,
+                        ),
+                    },
+                    equipment: action_idx as usize - 1,
+                };
+            }
+            false
+        }
         _ => false,
     }
 }

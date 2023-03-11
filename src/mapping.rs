@@ -12,6 +12,7 @@ pub enum Command {
     DescendStairs,
     Select,
     CreateItem,
+    UseActive(i32),
 }
 
 pub fn get_command(ctx: &mut BTerm) -> Option<Command> {
@@ -63,6 +64,15 @@ pub fn get_command(ctx: &mut BTerm) -> Option<Command> {
                 VirtualKeyCode::Period => Some(Command::Wait),
                 VirtualKeyCode::Escape | VirtualKeyCode::Q => Some(Command::Back),
                 VirtualKeyCode::Return => Some(Command::Select),
+                VirtualKeyCode::Key1 => Some(Command::UseActive(1)),
+                VirtualKeyCode::Key2 => Some(Command::UseActive(2)),
+                VirtualKeyCode::Key3 => Some(Command::UseActive(3)),
+                VirtualKeyCode::Key4 => Some(Command::UseActive(4)),
+                VirtualKeyCode::Key5 => Some(Command::UseActive(5)),
+                VirtualKeyCode::Key6 => Some(Command::UseActive(6)),
+                VirtualKeyCode::Key7 => Some(Command::UseActive(7)),
+                VirtualKeyCode::Key8 => Some(Command::UseActive(8)),
+                VirtualKeyCode::Key9 => Some(Command::UseActive(9)),
                 _ => None,
             }
         }

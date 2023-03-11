@@ -2,12 +2,13 @@ use std::collections::VecDeque;
 
 use bracket_lib::prelude::*;
 use components::*;
-use equipment::{build_blueprint, Equipment};
+use equipment::{build_blueprint, execute_active_target, Equipment};
 use hecs::{Entity, World};
 use map::{item_fill_map, populate_map};
 use messages::MessageLog;
 use monster::monster_act;
 use systems::*;
+use ui::ExamineUIRes;
 
 pub mod blueprint;
 pub mod components;
@@ -26,6 +27,7 @@ pub mod raws;
 pub mod skill;
 pub mod systems;
 pub mod ui;
+pub mod util;
 
 pub const WINDOW_WIDTH: i32 = 100;
 pub const WINDOW_HEIGHT: i32 = 70;
@@ -48,6 +50,10 @@ pub enum OperatingMode {
     OpenInventory(ui::InvUIState),
     OpenMessageLog,
     OpenExamine(ui::ExamineUIState),
+    EquipmentTargetting {
+        state: ui::ExamineUIState,
+        equipment: usize,
+    },
 }
 
 impl State {
@@ -70,6 +76,9 @@ impl State {
             OperatingMode::OpenInventory(s) => ui::draw_inventory_ui(s, self, ctx),
             OperatingMode::OpenMessageLog => ui::draw_message_log(self, ctx),
             OperatingMode::OpenExamine(s) => ui::draw_examine_ui(s, self, ctx),
+            OperatingMode::EquipmentTargetting { state: s, .. } => {
+                ui::draw_examine_ui(s, self, ctx)
+            }
         }
     }
 }
@@ -84,6 +93,7 @@ impl GameState for State {
         loop {
             match &self.operating_mode {
                 OperatingMode::Ticking => {
+                    self.run_systems(); // sometimes we get here direct from ui
                     let turn = self.turn_order.front();
                     if let Some(turn) = turn {
                         if self.ecs.satisfies::<&Player>(*turn).unwrap() {
@@ -104,7 +114,7 @@ impl GameState for State {
                             self.turn_order.rotate_left(1);
                             self.operating_mode = OperatingMode::Ticking;
                         }
-                        self.run_systems();
+                        // self.run_systems();
                     } else {
                         break;
                     }
@@ -168,11 +178,38 @@ impl GameState for State {
                 }
                 OperatingMode::OpenExamine(s) => {
                     if let Some(command) = mapping::get_command(ctx) {
-                        let (done, s) = ui::update_examine_ui(s.clone(), command);
-                        if done {
+                        let (done, s) = ui::update_examine_ui(s.clone(), self, command);
+                        if done == Some(ExamineUIRes::Done) {
                             self.operating_mode = OperatingMode::Ticking;
                         } else {
                             self.operating_mode = OperatingMode::OpenExamine(s);
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                OperatingMode::EquipmentTargetting {
+                    state: s,
+                    equipment,
+                } => {
+                    let equipment = equipment.clone();
+                    if let Some(command) = mapping::get_command(ctx) {
+                        let (done, s) = ui::update_examine_ui(s.clone(), self, command);
+                        match done {
+                            Some(ExamineUIRes::Done) => {
+                                self.operating_mode = OperatingMode::Ticking;
+                            }
+                            Some(ExamineUIRes::Select(pt)) => {
+                                execute_active_target(self, equipment, pt);
+                                self.turn_order.rotate_left(1);
+                                self.operating_mode = OperatingMode::Ticking;
+                            }
+                            None => {
+                                self.operating_mode = OperatingMode::EquipmentTargetting {
+                                    state: s,
+                                    equipment,
+                                };
+                            }
                         }
                     } else {
                         break;
@@ -192,18 +229,18 @@ fn main() -> BError {
     let mut world = World::new();
     let map = map::Map::new(0, &mut rng);
     let player_pos = map.rooms[0].center();
-    // let bp: Blueprint = serde_json::from_str(
-    //     r##"{ "img": "Sword", "equipment": "Sword", "filled": [[0, {"element":"Air", "power":2}]] }"##,
-    // )
-    // .unwrap();
-    // let equip = build_blueprint(&bp);
+    let bp: Blueprint = serde_json::from_str(
+        r##"{ "img": "Sword", "equipment": "Grapple", "filled": [[0, {"element":"Water", "power":2}]] }"##,
+    )
+    .unwrap();
+    let equip = build_blueprint(&bp);
     let player_entity = world.spawn((
         Health { max_hp: 80, hp: 80 },
         Position(player_pos),
         Player {
             current_blueprint: None,
-            passive_equipment: Vec::new(),
-            active_equipment: Vec::new(),
+            passive_equipment: vec![],
+            active_equipment: vec![Some(equip)],
         },
         Viewer {
             visible_tiles: Vec::new(),

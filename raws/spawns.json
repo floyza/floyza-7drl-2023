@@ -81,6 +81,23 @@
             "equipment": "Armor"
           }
         }
+      ],
+      [
+        { "Name": "Grappling Hook" },
+        {
+          "Renderable": {
+            "glyph": "¿",
+            "fg": "#708090",
+            "bg": "#000000",
+            "layer": 0
+          }
+        },
+        {
+          "Blueprint": {
+            "img": "Sword",
+            "equipment": "Grapple"
+          }
+        }
       ]
     ]
   }
