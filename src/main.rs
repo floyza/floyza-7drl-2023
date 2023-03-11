@@ -159,7 +159,7 @@ impl GameState for State {
                 }
                 OperatingMode::OpenExamine(s) => {
                     if let Some(command) = mapping::get_command(ctx) {
-                        let (done, s) = ui::update_examine_ui(s.clone(), self, command);
+                        let (done, s) = ui::update_examine_ui(s.clone(), command);
                         if done {
                             self.operating_mode = OperatingMode::Ticking;
                         } else {

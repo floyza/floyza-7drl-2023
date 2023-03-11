@@ -102,7 +102,7 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
                 .query_one_mut::<&Position>(state.player_entity)
                 .unwrap();
             state.operating_mode = OperatingMode::OpenExamine(ui::ExamineUIState {
-                point: player_pos.0,
+                point: Point::new(map::MAP_UI_DIM.width() / 2, map::MAP_UI_DIM.height() / 2),
             });
             false
         }

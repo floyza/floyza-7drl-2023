@@ -222,17 +222,19 @@ pub fn draw_inventory_ui(ui_state: &InvUIState, state: &State, ctx: &mut BTerm) 
 
 #[derive(Debug, Clone)]
 pub struct ExamineUIState {
+    /// relative to map display window
     pub point: Point,
 }
 
-pub fn update_examine_ui(
-    mut ui_state: ExamineUIState,
-    state: &State,
-    command: Command,
-) -> (bool, ExamineUIState) {
+pub fn update_examine_ui(mut ui_state: ExamineUIState, command: Command) -> (bool, ExamineUIState) {
     match command {
         Command::Move { target: offset } => {
-            if state.map.in_bounds(ui_state.point + offset) {
+            let n = ui_state.point + offset;
+            if n.x >= 0
+                && n.y >= 0
+                && n.x < map::MAP_UI_DIM.width()
+                && n.y < map::MAP_UI_DIM.height()
+            {
                 ui_state.point += offset;
             }
         }
@@ -245,16 +247,24 @@ pub fn update_examine_ui(
 }
 
 pub fn draw_examine_ui(ui_state: &ExamineUIState, state: &State, ctx: &mut BTerm) {
-    // TODO fix this to move based on map pos
+    let mut query = state
+        .ecs
+        .query_one::<&Position>(state.player_entity)
+        .unwrap();
+    let player_pos = query.get().unwrap().0;
+    let offset = player_pos - map::MAP_UI_DIM.center();
+    let top_left = Point::new(map::MAP_UI_DIM.x1, map::MAP_UI_DIM.y1);
     ctx.set(
-        ui_state.point.x,
-        ui_state.point.y,
+        ui_state.point.x + top_left.x,
+        ui_state.point.y + top_left.y,
         RGB::named(PURPLE),
         RGB::named(BLACK),
         to_cp437('*'),
     );
     ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y, "You see:");
-    let idx = state.map.point2d_to_index(ui_state.point);
+    let idx = state
+        .map
+        .point2d_to_index(ui_state.point + top_left + offset);
     if state.map.visible_tiles[idx] {
         let mut line = 0;
         for entity in state.map.tile_contents[idx].iter() {
