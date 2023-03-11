@@ -118,7 +118,13 @@ impl GameState for State {
                                         .query_one_mut::<&Inventory>(self.player_entity)
                                         .unwrap();
                                     let item = inv.contents[idx as usize];
-                                    if let Ok(bp) = self.ecs.query_one_mut::<&Blueprint>(item) {
+                                    if let Ok((bp, name)) =
+                                        self.ecs.query_one_mut::<(&Blueprint, &Name)>(item)
+                                    {
+                                        self.messages.enqueue_message(&format!(
+                                            "You attach the {}.",
+                                            name.0
+                                        ));
                                         let bp = bp.clone();
                                         let (p, inv) = self
                                             .ecs
