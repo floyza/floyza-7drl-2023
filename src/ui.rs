@@ -380,59 +380,84 @@ pub fn draw_examine_ui(ui_state: &ExamineUIState, state: &State, ctx: &mut BTerm
         to_cp437('*'),
     );
     ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y, "You see:");
-    let idx = state
-        .map
-        .point2d_to_index(ui_state.point + top_left + offset);
-    if state.map.visible_tiles[idx] {
-        let mut line = 0;
-        for entity in state.map.tile_contents[idx].iter() {
-            let mut query = state.ecs.query_one::<&Name>(*entity).unwrap();
-            if let Some(name) = query.get() {
-                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1 + line, &name.0);
-                line += 1;
-                if state.debug {
-                    let stuff = debug::get_entity_components(state.ecs.entity(*entity).unwrap());
-                    for comp in stuff {
-                        comp.apply(|c| {
-                            ctx.print(
-                                SIDEBAR_EXTRA_POS.x,
-                                SIDEBAR_EXTRA_POS.y + 1 + line,
-                                format!("-> {:?}", c),
-                            );
-                        });
-                        line += 1;
+    let mut line = 0;
+    if state.debug {
+        ctx.print(
+            SIDEBAR_EXTRA_POS.x,
+            SIDEBAR_EXTRA_POS.y + 1 + line,
+            format!("@pos: {:?}", ui_state.point + top_left + offset),
+        );
+        line += 1;
+    }
+    if state.map.in_bounds(ui_state.point + top_left + offset) {
+        let idx = state
+            .map
+            .point2d_to_index(ui_state.point + top_left + offset);
+        if state.map.visible_tiles[idx] {
+            for entity in state.map.tile_contents[idx].iter() {
+                let mut query = state.ecs.query_one::<&Name>(*entity).unwrap();
+                if let Some(name) = query.get() {
+                    ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1 + line, &name.0);
+                    line += 1;
+                    if state.debug {
+                        let stuff =
+                            debug::get_entity_components(state.ecs.entity(*entity).unwrap());
+                        for comp in stuff {
+                            comp.apply(|c| {
+                                ctx.print(
+                                    SIDEBAR_EXTRA_POS.x,
+                                    SIDEBAR_EXTRA_POS.y + 1 + line,
+                                    format!("-> {:?}", c),
+                                );
+                            });
+                            line += 1;
+                        }
                     }
                 }
             }
-        }
-        match state.map.tiles[idx] {
-            map::Tile::Wall => {
-                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1 + line, "Wall");
+            match state.map.tiles[idx] {
+                map::Tile::Wall => {
+                    ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1 + line, "Wall");
+                }
+                map::Tile::Floor => {
+                    ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1 + line, "Floor");
+                }
+                map::Tile::Stairs => {
+                    ctx.print(
+                        SIDEBAR_EXTRA_POS.x,
+                        SIDEBAR_EXTRA_POS.y + 1 + line,
+                        "Stairs",
+                    );
+                }
             }
-            map::Tile::Floor => {
-                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1 + line, "Floor");
+        } else if state.map.revealed_tiles[idx] {
+            match state.map.tiles[idx] {
+                map::Tile::Wall => {
+                    ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1 + line, "Wall");
+                }
+                map::Tile::Floor => {
+                    ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1 + line, "Floor");
+                }
+                map::Tile::Stairs => {
+                    ctx.print(
+                        SIDEBAR_EXTRA_POS.x,
+                        SIDEBAR_EXTRA_POS.y + 1 + line,
+                        "Stairs",
+                    );
+                }
             }
-            map::Tile::Stairs => {
-                ctx.print(
-                    SIDEBAR_EXTRA_POS.x,
-                    SIDEBAR_EXTRA_POS.y + 1 + line,
-                    "Stairs",
-                );
-            }
-        }
-    } else if state.map.revealed_tiles[idx] {
-        match state.map.tiles[idx] {
-            map::Tile::Wall => {
-                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Wall");
-            }
-            map::Tile::Floor => {
-                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Floor");
-            }
-            map::Tile::Stairs => {
-                ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Stairs");
-            }
+        } else {
+            ctx.print(
+                SIDEBAR_EXTRA_POS.x,
+                SIDEBAR_EXTRA_POS.y + 1 + line,
+                "Nothing",
+            );
         }
     } else {
-        ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1, "Nothing");
+        ctx.print(
+            SIDEBAR_EXTRA_POS.x,
+            SIDEBAR_EXTRA_POS.y + 1 + line,
+            "Nothing",
+        );
     }
 }

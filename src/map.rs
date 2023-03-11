@@ -235,6 +235,9 @@ pub fn draw_map(state: &State, ctx: &mut BTerm) {
     let player_pos = query.get().unwrap().0;
     let offset = player_pos - MAP_UI_DIM.center();
     MAP_UI_DIM.for_each(|pt| {
+        if !state.map.in_bounds(pt + offset) {
+            return;
+        }
         let idx = state.map.point2d_to_index(pt + offset);
         if let Some(tile) = state.map.tiles.get(idx) {
             if state.map.revealed_tiles[idx] {
