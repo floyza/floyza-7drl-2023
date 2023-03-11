@@ -49,11 +49,11 @@
   "items": {
     "0": [
       [
-        { "Name": "Simple Wooden Sword" },
+        { "Name": "Sword" },
         {
           "Renderable": {
             "glyph": "/",
-            "fg": "#a52a2a",
+            "fg": "#696969",
             "bg": "#000000",
             "layer": 0
           }
@@ -64,23 +64,21 @@
             "equipment": "Sword"
           }
         }
-      ]
-    ],
-    "1": [
+      ],
       [
-        { "Name": "Simple Wooden Sword v2" },
+        { "Name": "Armor" },
         {
           "Renderable": {
-            "glyph": "/",
-            "fg": "#a52aff",
+            "glyph": "[",
+            "fg": "#8b4513",
             "bg": "#000000",
             "layer": 0
           }
         },
         {
           "Blueprint": {
-            "img": "Sword",
-            "equipment": "Sword"
+            "img": "Armor",
+            "equipment": "Armor"
           }
         }
       ]
