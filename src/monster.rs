@@ -19,22 +19,24 @@ pub fn monster_act(state: &mut State, entity: Entity) {
         if viewer.visible_tiles.contains(&player_pos) {
             target = Some(player_pos);
             mon.tracking = target;
-        }
-    }
-    if let Some(skilled) = skilled {
-        let len = skilled.skills.len();
-        let mut weights: Vec<f32> = skilled.skills.iter().map(|x| x.0 / len as f32).collect();
-        weights.push(1.0); // for normal action
-        let dist = WeightedIndex::new(weights).unwrap();
-        let roll = dist.sample(state.rng.get_rng());
-        let mut success = false;
-        if roll != len {
-            // if not normal attack
-            let skill = skilled.skills[roll];
-            success = skill.1.apply(entity, state.player_entity, state).is_some();
-        }
-        if success {
-            return;
+
+            if let Some(skilled) = skilled {
+                let len = skilled.skills.len();
+                let mut weights: Vec<f32> =
+                    skilled.skills.iter().map(|x| x.0 / len as f32).collect();
+                weights.push(1.0); // for normal action
+                let dist = WeightedIndex::new(weights).unwrap();
+                let roll = dist.sample(state.rng.get_rng());
+                let mut success = false;
+                if roll != len {
+                    // if not normal attack
+                    let skill = skilled.skills[roll];
+                    success = skill.1.apply(entity, state.player_entity, state).is_some();
+                }
+                if success {
+                    return;
+                }
+            }
         }
     }
     let (mon, viewer, pos) = state
