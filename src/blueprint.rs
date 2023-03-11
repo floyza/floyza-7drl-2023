@@ -34,7 +34,7 @@ pub fn load_blueprints() {
         BPImage::Sword,
         BPIData {
             img: xp,
-            gem_spots: vec![Point::new(8, 19), Point::new(8, 8)],
+            gem_spots: vec![Point::new(8, 19)],
         },
     )]);
     *BLUEPRINTS.lock().unwrap() = map;

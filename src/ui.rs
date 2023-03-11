@@ -1,5 +1,6 @@
 use crate::{
-    components::*, debug, map, mapping::Command, OperatingMode, State, WINDOW_HEIGHT, WINDOW_WIDTH,
+    components::*, debug, equipment::EquipmentEffect, map, mapping::Command, OperatingMode, State,
+    WINDOW_HEIGHT, WINDOW_WIDTH,
 };
 use bracket_lib::prelude::*;
 
@@ -54,32 +55,48 @@ pub fn draw_messages(state: &State, ctx: &mut BTerm) {
 pub fn draw_side_info(state: &State, ctx: &mut BTerm) {
     let mut query = state
         .ecs
-        .query_one::<(&Health, &Name)>(state.player_entity)
+        .query_one::<(&Health, &Player)>(state.player_entity)
         .unwrap();
-    let (health, name) = query.get().unwrap();
+    let (health, player) = query.get().unwrap();
 
-    ctx.print(1, 1, format!("Name: {}", name.0));
-
-    let hp_x = 1;
-    let hp_y = 2;
-
-    ctx.print(
-        hp_x,
-        hp_y,
-        format!("Health: {}/{}", health.hp, health.max_hp),
-    );
+    ctx.print(1, 1, format!("Health: {}/{}", health.hp, health.max_hp));
 
     let bar_width = LEFT_SIDEBAR_WIDTH - 3;
 
     ctx.draw_bar_horizontal(
-        hp_x,
-        hp_y + 1,
+        1,
+        2,
         bar_width,
         health.hp,
         health.max_hp,
         RGB::named(RED),
         RGB::named(GRAY),
     );
+
+    let mut line = 1;
+    ctx.print(1, 3 + line, "Actives:");
+    for eq in player.equipment.iter().filter(|e| {
+        if let EquipmentEffect::Active(_e) = &e.effect {
+            true
+        } else {
+            false
+        }
+    }) {
+        ctx.print(1, 3 + line, format!("{:?}", eq.ingredients.0));
+        line += 1;
+    }
+    ctx.print(1, 4 + line, "Passives:");
+    line += 1;
+    for eq in player.equipment.iter().filter(|e| {
+        if let EquipmentEffect::Passive(_e) = &e.effect {
+            true
+        } else {
+            false
+        }
+    }) {
+        ctx.print(1, 4 + line, format!("{:?}", eq.ingredients.0));
+        line += 1;
+    }
 
     for y in 0..WINDOW_HEIGHT {
         ctx.set(
@@ -279,7 +296,6 @@ pub fn update_inventory_ui(
                 .ecs
                 .query_one_mut::<&Player>(state.player_entity)
                 .unwrap();
-            console::log(format!("{:?}", p.current_blueprint));
             if p.current_blueprint.is_some() {
                 ui_state.confirming = Some(ConfUIState {
                     query: "Are you sure? This will delete the existing blueprint.".to_owned(),

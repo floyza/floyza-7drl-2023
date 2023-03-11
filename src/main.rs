@@ -17,6 +17,7 @@ pub mod essence;
 pub mod item;
 pub mod map;
 pub mod mapping;
+pub mod math;
 pub mod messages;
 pub mod monster;
 pub mod player;
@@ -195,6 +196,7 @@ fn main() -> BError {
         Position(player_pos),
         Player {
             current_blueprint: None,
+            equipment: Vec::new(),
         },
         Viewer {
             visible_tiles: Vec::new(),

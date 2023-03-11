@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use crate::{components::*, ui, WINDOW_HEIGHT, WINDOW_WIDTH};
 use bracket_lib::prelude::*;
-use hecs::Entity;
+use hecs::{Entity, Satisfies};
 
 use crate::State;
 
@@ -270,15 +270,23 @@ pub fn draw_map(state: &State, ctx: &mut BTerm) {
 
 fn draw_entities(state: &State, ctx: &mut BTerm, offset: Point) {
     let mut renderings: BTreeMap<i32, Vec<(Renderable, Point)>> = BTreeMap::new();
-    for (_id, (pos, render)) in state.ecs.query::<(&Position, &Renderable)>().iter() {
+    for (_id, (pos, render, slowed)) in state
+        .ecs
+        .query::<(&Position, &Renderable, Satisfies<&Slowed>)>()
+        .iter()
+    {
         if state.map.visible_tiles[state.map.point2d_to_index(pos.0)] {
             if !renderings.contains_key(&render.layer) {
                 renderings.insert(render.layer, Vec::new());
             }
+            let mut drawing = render.clone();
+            if slowed {
+                drawing.bg = RGB::named(DARKBLUE);
+            }
             renderings
                 .get_mut(&render.layer)
                 .unwrap()
-                .push((render.clone(), pos.0.clone()));
+                .push((drawing, pos.0.clone()));
         }
     }
     for (_layer_id, layer) in renderings {

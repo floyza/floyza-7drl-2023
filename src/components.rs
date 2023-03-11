@@ -2,7 +2,12 @@ use bracket_lib::prelude::*;
 use hecs::Entity;
 use serde::{Deserialize, Serialize};
 
-use crate::{blueprint::BPImage, equipment::EquipmentType, essence::Essence, skill::Skill};
+use crate::{
+    blueprint::BPImage,
+    equipment::{Equipment, EquipmentType},
+    essence::Essence,
+    skill::Skill,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(from = "HealthHelper")]
@@ -108,9 +113,11 @@ const fn _default_true() -> bool {
     true
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Player {
     pub current_blueprint: Option<Blueprint>,
+    #[serde(skip)] // TODO
+    pub equipment: Vec<Equipment>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -167,6 +174,11 @@ pub enum Elemental {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Rank(pub i32);
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Slowed {
+    pub duration: u32,
+}
 
 impl std::fmt::Display for Elemental {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

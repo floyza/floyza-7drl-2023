@@ -3,6 +3,9 @@
 * make monster movement more normal
 They should walk towards you even if there's a blocking monster
 Also, they shouldn't be omniscient and be able to route around the whole map to get to you.
+* make slowed enemies move slower + blue bg
+* ui for examining equipment
+* ui for examining blueprint
 * IMPORTANT
 ** main menu
 plus help file

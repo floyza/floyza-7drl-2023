@@ -1,7 +1,9 @@
 use bracket_lib::prelude::*;
 use hecs::With;
 
-use crate::{components::*, map, mapping::Command, ui, OperatingMode, State};
+use crate::{
+    components::*, equipment::build_blueprint, map, mapping::Command, ui, OperatingMode, State,
+};
 
 pub fn player_act(state: &mut State, command: &Command) -> bool {
     match *command {
@@ -126,11 +128,20 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
                 .ecs
                 .query_one_mut::<&mut Player>(state.player_entity)
                 .unwrap();
-            let Some(p) = &p.current_blueprint else { return false };
-            if p.filled.len() == p.img.lookup().gem_spots.len() {
-                todo!();
+            let Some(bp) = &p.current_blueprint else { return false };
+            if bp.filled.len() == bp.img.lookup().gem_spots.len() {
+                let thing = build_blueprint(bp);
+                p.equipment.push(thing);
+                state
+                    .messages
+                    .enqueue_message(&format!("You build a {:?}!", bp.equipment));
+                p.current_blueprint = None;
+                return true;
             }
-            todo!();
+            state
+                .messages
+                .enqueue_message("Slots not full: cannot build yet.");
+            false
         }
         _ => false,
     }

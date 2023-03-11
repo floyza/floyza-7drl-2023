@@ -4,7 +4,7 @@ use crate::components::*;
 use hecs::{Entity, NoSuchEntity, World};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Component {
     Health(Health),
     Attack(Attack),
@@ -22,6 +22,7 @@ pub enum Component {
     Ephermal(Ephermal),
     Elemental(Elemental),
     Rank(Rank),
+    Slowed(Slowed),
 }
 
 pub trait IsComponent: Debug {}
@@ -46,6 +47,7 @@ impl Component {
             Component::Ephermal(c) => ecs.insert_one(entity, c),
             Component::Elemental(c) => ecs.insert_one(entity, c),
             Component::Rank(c) => ecs.insert_one(entity, c),
+            Component::Slowed(c) => ecs.insert_one(entity, c),
         }
     }
     pub fn apply(&self, mut f: impl FnMut(&dyn IsComponent)) {
@@ -66,6 +68,7 @@ impl Component {
             Component::Ephermal(c) => f(c),
             Component::Elemental(c) => f(c),
             Component::Rank(c) => f(c),
+            Component::Slowed(c) => f(c),
         }
     }
 }
