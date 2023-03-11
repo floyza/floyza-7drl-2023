@@ -18,9 +18,15 @@ pub fn gain_essence(state: &mut State, essence: Essence) {
     for idx in 0..count {
         if bp.filled.iter().find(|(i, _e)| *i == idx).is_none() {
             bp.filled.push((idx, essence.clone()));
+            let strength = match essence.power {
+                0 => "weak ",
+                1 => "",
+                2 => "strong ",
+                _ => panic!("invalid strength"),
+            };
             state.messages.enqueue_message(&format!(
-                "Zoop! {} essence is sucked into your blueprint.",
-                essence.element
+                "Zoop! {} {} essence is sucked into your blueprint.",
+                essence.element, strength,
             ));
             return;
         }

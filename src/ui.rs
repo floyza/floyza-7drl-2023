@@ -1,6 +1,10 @@
 use crate::{
-    components::*, debug, equipment::EquipmentEffect, map, mapping::Command, OperatingMode, State,
-    WINDOW_HEIGHT, WINDOW_WIDTH,
+    components::*,
+    debug,
+    equipment::{print_desc, EquipmentEffect},
+    map,
+    mapping::Command,
+    OperatingMode, State, WINDOW_HEIGHT, WINDOW_WIDTH,
 };
 use bracket_lib::prelude::*;
 
@@ -143,9 +147,34 @@ pub fn draw_current_blueprint(state: &State, ctx: &mut BTerm) {
                 to_cp437('☼'),
             );
         }
+        {
+            let mut ess = vec![];
+            for i in 0..bpi.gem_spots.len() {
+                if let Some(essence) = bp.filled.iter().find(|p| p.0 == i) {
+                    ess.push(Some(essence.1.clone()));
+                } else {
+                    ess.push(None);
+                }
+            }
+            let mut builder = TextBuilder::empty();
+            print_desc(bp.equipment, &ess, &mut builder);
+            let mut block =
+                TextBlock::new(sidebar_x + 1, offset_y + 30, RIGHT_SIDEBAR_WIDTH - 1, 5);
+            block
+                .print(&builder)
+                .expect("Description text was too long");
+            let mut draw_batch = DrawBatch::new();
+            // draw_batch.cls();
+            block.render_to_draw_batch(
+                &mut draw_batch,
+                // &Rect::with_size(sidebar_x + 1, offset_y + 30, RIGHT_SIDEBAR_WIDTH - 1, 5),
+            );
+            draw_batch.submit(0).unwrap();
+            render_draw_buffer(ctx).unwrap();
+        }
         if bp.filled.len() == bpi.gem_spots.len() {
-            ctx.print(sidebar_x + 1, offset_y + 30, "!Blueprint Ready!");
-            ctx.print(sidebar_x + 1, offset_y + 30 + 1, "Press 'a' to get!");
+            ctx.print(sidebar_x + 1, offset_y + 30 + 5, "Blueprint Ready!");
+            ctx.print(sidebar_x + 1, offset_y + 30 + 5 + 1, "Press 'a' to get!");
         }
     } else {
         ctx.print(sidebar_x + 1, 1, "No active blueprint");

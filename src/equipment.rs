@@ -20,31 +20,44 @@ pub struct Equipment {
     pub effect: EquipmentEffect,
 }
 
-pub fn print_desc(typ: EquipmentType, ess: &Vec<Option<Essence>>, x: i32, y: i32, ctx: &mut BTerm) {
-    let desc = match typ {
-        EquipmentType::Sword => sword_desc(ess),
+pub fn print_desc(typ: EquipmentType, ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
+    match typ {
+        EquipmentType::Sword => sword_desc(ess, builder),
         EquipmentType::Armor => todo!(),
         EquipmentType::Gun => todo!(),
         EquipmentType::Grapple => todo!(),
     };
-    ctx.printer(x, y, &desc, TextAlign::Left, None);
 }
 
-fn colorize_print_element(fire: &str, water: &str, air: &str, e: Option<Essence>) -> String {
+fn colorize_print_element(
+    fire: &str,
+    water: &str,
+    air: &str,
+    e: Option<Essence>,
+    builder: &mut TextBuilder,
+) {
     if let Some(e) = e {
         match e.element {
-            Elemental::Fire => format!("#[red]{}#[]", fire),
-            Elemental::Water => format!("#[darkblue]{}#[]", water),
-            Elemental::Air => format!("#[skyblue]{}#[]", air),
-        }
+            Elemental::Fire => builder.fg(RGB::named(RED)).line_wrap(fire),
+            Elemental::Water => builder.fg(RGB::named(DARKBLUE)).line_wrap(water),
+            Elemental::Air => builder.fg(RGB::named(SKYBLUE)).line_wrap(air),
+        };
     } else {
-        "#[gray]___#[]".to_owned()
+        builder.fg(RGB::named(GRAY)).line_wrap("___");
     }
 }
 
-fn sword_desc(ess: &Vec<Option<Essence>>) -> String {
-    let bit = colorize_print_element("Damage", "Freeze and slow", "Blast back", ess[0].clone());
-    format!("{} your target on hit.", bit)
+fn sword_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
+    colorize_print_element(
+        "Damage",
+        "Freeze and slow",
+        "Blast back",
+        ess[0].clone(),
+        builder,
+    );
+    builder
+        .fg(RGB::named(WHITE))
+        .line_wrap("your target on hit.");
 }
 
 #[derive(Debug, Clone)]
