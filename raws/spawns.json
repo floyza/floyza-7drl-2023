@@ -2,13 +2,31 @@
   "monsters": {
     "0": [
       [
-        { "Name": "Orc" },
+        { "Name": "Blazepup" },
         {
           "Health": { "max_hp": 30 }
         },
         { "Attack": { "damage": 10 } },
         { "Viewer": { "range": 8 } },
-        { "Blocker": {} },
+        {
+          "Renderable": {
+            "glyph": "h",
+            "fg": "#ff8c00",
+            "bg": "#000000",
+            "layer": 1
+          }
+        },
+        {
+          "Elemental": "Fire"
+        }
+      ],
+      [
+        { "Name": "Gustspitter" },
+        {
+          "Health": { "max_hp": 20 }
+        },
+        { "Attack": { "damage": 8 } },
+        { "Viewer": { "range": 8 } },
         {
           "Renderable": {
             "glyph": "o",
@@ -16,46 +34,10 @@
             "bg": "#000000",
             "layer": 1
           }
-        }
-      ],
-      [
-        { "Name": "Orc Archer" },
-        {
-          "Health": { "max_hp": 20 }
-        },
-        { "Attack": { "damage": 8 } },
-        { "Viewer": { "range": 8 } },
-        { "Blocker": {} },
-        {
-          "Renderable": {
-            "glyph": "o",
-            "fg": "#ffbf00",
-            "bg": "#000000",
-            "layer": 1
-          }
         },
         {
           "Skilled": {
             "skills": ["ShootBow"]
-          }
-        }
-      ]
-    ],
-    "1": [
-      [
-        { "Name": "Orc Lvl 2" },
-        {
-          "Health": { "max_hp": 20 }
-        },
-        { "Attack": { "damage": 8 } },
-        { "Viewer": { "range": 8 } },
-        { "Blocker": {} },
-        {
-          "Renderable": {
-            "glyph": "o",
-            "fg": "#ffbfff",
-            "bg": "#000000",
-            "layer": 1
           }
         }
       ]

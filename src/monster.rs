@@ -97,7 +97,12 @@ pub fn spawn_monster(state: &mut State, dl: i32, pos: Point) -> Entity {
         .ecs
         .insert(
             entity,
-            (Monster { tracking: None }, Position(pos), Ephermal),
+            (
+                Monster { tracking: None },
+                Position(pos),
+                Ephermal,
+                Blocker {},
+            ),
         )
         .unwrap();
     entity

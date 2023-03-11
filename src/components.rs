@@ -156,6 +156,14 @@ pub struct Blueprint {
 /// gets removed when we go into a new level
 pub struct Ephermal;
 
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub enum Elemental {
+    Fire,
+    Water,
+    Air,
+    Earth,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -52,5 +52,11 @@ pub fn get_entity_components(entity: hecs::EntityRef<'_>) -> Vec<components_serd
     if let Some(x) = entity.get::<&Blueprint>() {
         c.push(Component::Blueprint((*x).clone()));
     }
+    if let Some(x) = entity.get::<&Ephermal>() {
+        c.push(Component::Ephermal((*x).clone()));
+    }
+    if let Some(x) = entity.get::<&Elemental>() {
+        c.push(Component::Elemental((*x).clone()));
+    }
     c
 }
