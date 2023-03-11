@@ -2,7 +2,11 @@ use bracket_lib::prelude::*;
 use hecs::With;
 
 use crate::{
-    components::*, equipment::build_blueprint, map, mapping::Command, ui, OperatingMode, State,
+    components::*,
+    equipment::{build_blueprint, EquipmentEffect},
+    map,
+    mapping::Command,
+    ui, OperatingMode, State,
 };
 
 pub fn player_act(state: &mut State, command: &Command) -> bool {
@@ -131,7 +135,10 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
             let Some(bp) = &p.current_blueprint else { return false };
             if bp.filled.len() == bp.img.lookup().gem_spots.len() {
                 let thing = build_blueprint(bp);
-                p.equipment.push(thing);
+                match thing.effect {
+                    EquipmentEffect::Active(_) => p.active_equipment.push(thing),
+                    EquipmentEffect::Passive(_) => p.passive_equipment.push(thing),
+                }
                 state
                     .messages
                     .enqueue_message(&format!("You build a {:?}!", bp.equipment));

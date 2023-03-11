@@ -25,7 +25,7 @@ pub fn gain_essence(state: &mut State, essence: Essence) {
                 _ => panic!("invalid strength"),
             };
             state.messages.enqueue_message(&format!(
-                "Zoop! {} {} essence is sucked into your blueprint.",
+                "Zoop! {} {}essence is sucked into your blueprint.",
                 essence.element, strength,
             ));
             return;

@@ -196,7 +196,8 @@ fn main() -> BError {
         Position(player_pos),
         Player {
             current_blueprint: None,
-            equipment: Vec::new(),
+            passive_equipment: Vec::new(),
+            active_equipment: Vec::new(),
         },
         Viewer {
             visible_tiles: Vec::new(),

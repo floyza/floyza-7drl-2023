@@ -79,25 +79,13 @@ pub fn draw_side_info(state: &State, ctx: &mut BTerm) {
 
     let mut line = 1;
     ctx.print(1, 3 + line, "Actives:");
-    for eq in player.equipment.iter().filter(|e| {
-        if let EquipmentEffect::Active(_e) = &e.effect {
-            true
-        } else {
-            false
-        }
-    }) {
+    for eq in player.active_equipment.iter() {
         ctx.print(1, 3 + line, format!("{:?}", eq.ingredients.0));
         line += 1;
     }
     ctx.print(1, 4 + line, "Passives:");
     line += 1;
-    for eq in player.equipment.iter().filter(|e| {
-        if let EquipmentEffect::Passive(_e) = &e.effect {
-            true
-        } else {
-            false
-        }
-    }) {
+    for eq in player.passive_equipment.iter() {
         ctx.print(1, 4 + line, format!("{:?}", eq.ingredients.0));
         line += 1;
     }
@@ -164,11 +152,7 @@ pub fn draw_current_blueprint(state: &State, ctx: &mut BTerm) {
                 .print(&builder)
                 .expect("Description text was too long");
             let mut draw_batch = DrawBatch::new();
-            // draw_batch.cls();
-            block.render_to_draw_batch(
-                &mut draw_batch,
-                // &Rect::with_size(sidebar_x + 1, offset_y + 30, RIGHT_SIDEBAR_WIDTH - 1, 5),
-            );
+            block.render_to_draw_batch(&mut draw_batch);
             draw_batch.submit(0).unwrap();
             render_draw_buffer(ctx).unwrap();
         }

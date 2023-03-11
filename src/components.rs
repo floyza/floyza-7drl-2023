@@ -117,7 +117,9 @@ const fn _default_true() -> bool {
 pub struct Player {
     pub current_blueprint: Option<Blueprint>,
     #[serde(skip)] // TODO
-    pub equipment: Vec<Equipment>,
+    pub passive_equipment: Vec<Equipment>,
+    #[serde(skip)] // TODO
+    pub active_equipment: Vec<Equipment>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
