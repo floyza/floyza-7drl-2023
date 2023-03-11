@@ -24,11 +24,10 @@ pub mod skill;
 pub mod systems;
 pub mod ui;
 
-pub const WINDOW_WIDTH: i32 = 80;
-pub const WINDOW_HEIGHT: i32 = 50;
+pub const WINDOW_WIDTH: i32 = 100;
+pub const WINDOW_HEIGHT: i32 = 70;
 
 pub struct State {
-    pub size: Point,
     pub ecs: World,
     pub map: map::Map,
     pub player_entity: Entity,
@@ -61,7 +60,7 @@ impl State {
         ui::draw_messages(self, ctx);
         ui::draw_side_info(self, ctx);
         ui::draw_current_blueprint(self, ctx);
-        ui::draw_corners(self, ctx);
+        ui::draw_corners(ctx);
         match &self.operating_mode {
             OperatingMode::Ticking => {}
             OperatingMode::WaitingForInput => {}
@@ -216,7 +215,6 @@ fn main() -> BError {
     ));
 
     let mut state = State {
-        size: Point::new(100, 70),
         ecs: world,
         map,
         player_entity,
@@ -236,6 +234,8 @@ fn main() -> BError {
     populate_map(&mut state);
     item_fill_map(&mut state);
 
-    let context = BTermBuilder::simple(100, 70)?.with_title("tba").build()?;
+    let context = BTermBuilder::simple(WINDOW_WIDTH, WINDOW_HEIGHT)?
+        .with_title("tba")
+        .build()?;
     main_loop(context, state)
 }

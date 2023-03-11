@@ -1,4 +1,6 @@
-use crate::{components::*, debug, map, mapping::Command, OperatingMode, State};
+use crate::{
+    components::*, debug, map, mapping::Command, OperatingMode, State, WINDOW_HEIGHT, WINDOW_WIDTH,
+};
 use bracket_lib::prelude::*;
 
 pub const SIDEBAR_EXTRA_POS: Point = Point { x: 1, y: 10 };
@@ -6,17 +8,17 @@ pub const LEFT_SIDEBAR_WIDTH: i32 = 20;
 pub const RIGHT_SIDEBAR_WIDTH: i32 = 20;
 pub const MESSAGE_LOG_HEIGHT: i32 = 8;
 
-pub fn draw_corners(state: &State, ctx: &mut BTerm) {
+pub fn draw_corners(ctx: &mut BTerm) {
     ctx.set(
         RIGHT_SIDEBAR_WIDTH - 1,
-        state.size.y - MESSAGE_LOG_HEIGHT,
+        WINDOW_HEIGHT - MESSAGE_LOG_HEIGHT,
         RGB::named(WHITE),
         RGB::named(BLACK),
         to_cp437('├'),
     );
     ctx.set(
-        state.size.x - LEFT_SIDEBAR_WIDTH,
-        state.size.y - MESSAGE_LOG_HEIGHT,
+        WINDOW_WIDTH - LEFT_SIDEBAR_WIDTH,
+        WINDOW_HEIGHT - MESSAGE_LOG_HEIGHT,
         RGB::named(WHITE),
         RGB::named(BLACK),
         to_cp437('┤'),
@@ -34,14 +36,14 @@ pub fn draw_messages(state: &State, ctx: &mut BTerm) {
     {
         ctx.print(
             RIGHT_SIDEBAR_WIDTH + 1,
-            state.size.y - 1 - i as i32,
+            WINDOW_HEIGHT - 1 - i as i32,
             message,
         );
     }
-    for x in RIGHT_SIDEBAR_WIDTH..state.size.x - LEFT_SIDEBAR_WIDTH {
+    for x in RIGHT_SIDEBAR_WIDTH..WINDOW_WIDTH - LEFT_SIDEBAR_WIDTH {
         ctx.set(
             x,
-            state.size.y - MESSAGE_LOG_HEIGHT,
+            WINDOW_HEIGHT - MESSAGE_LOG_HEIGHT,
             RGB::named(WHITE),
             RGB::named(BLACK),
             to_cp437('─'),
@@ -79,7 +81,7 @@ pub fn draw_side_info(state: &State, ctx: &mut BTerm) {
         RGB::named(GRAY),
     );
 
-    for y in 0..state.size.y {
+    for y in 0..WINDOW_HEIGHT {
         ctx.set(
             RIGHT_SIDEBAR_WIDTH - 1,
             y,
@@ -92,8 +94,8 @@ pub fn draw_side_info(state: &State, ctx: &mut BTerm) {
 
 pub fn draw_current_blueprint(state: &State, ctx: &mut BTerm) {
     // images are 17x30
-    let sidebar_x = state.size.x - RIGHT_SIDEBAR_WIDTH;
-    for y in 0..state.size.y {
+    let sidebar_x = WINDOW_WIDTH - RIGHT_SIDEBAR_WIDTH;
+    for y in 0..WINDOW_HEIGHT {
         ctx.set(
             sidebar_x,
             y,
@@ -124,6 +126,10 @@ pub fn draw_current_blueprint(state: &State, ctx: &mut BTerm) {
                 RGB::named(BLACK),
                 to_cp437('☼'),
             );
+        }
+        if bp.filled.len() == bpi.gem_spots.len() {
+            ctx.print(sidebar_x + 1, offset_y + 30, "!Blueprint Ready!");
+            ctx.print(sidebar_x + 1, offset_y + 30 + 1, "Press 'a' to get!");
         }
     } else {
         ctx.print(sidebar_x + 1, 1, "No active blueprint");
@@ -200,11 +206,11 @@ pub fn update_confirmation_ui(
     (None, ui_state)
 }
 
-pub fn draw_confirmation_ui(ui_state: &ConfUIState, state: &State, ctx: &mut BTerm) {
+pub fn draw_confirmation_ui(ui_state: &ConfUIState, ctx: &mut BTerm) {
     let width = ui_state.query.len() as i32 + 4;
     let height = 5;
-    let x = (state.size.x - width) / 2;
-    let y = (state.size.y - height) / 2;
+    let x = (WINDOW_WIDTH - width) / 2;
+    let y = (WINDOW_HEIGHT - height) / 2;
     ctx.draw_box(x, y, width, height, RGB::named(WHITE), RGB::named(BLACK));
     ctx.print(x + 2, y + 1, &ui_state.query);
     if ui_state.selection {
@@ -328,7 +334,7 @@ pub fn draw_inventory_ui(ui_state: &InvUIState, state: &State, ctx: &mut BTerm) 
         ctx.print(x + 2, line, name);
     }
     if let Some(confirming) = &ui_state.confirming {
-        draw_confirmation_ui(confirming, state, ctx);
+        draw_confirmation_ui(confirming, ctx);
     }
 }
 
