@@ -2,101 +2,101 @@
   "monsters": {
     "0": [
       [
-      { "Name": "Orc" },
-      {
-        "Health": { "max_hp": 30 }
-      },
-      { "Attack": { "damage": 10 } },
-      { "Viewer": { "range": 8 } },
-      { "Blocker": {} },
-      {
-        "Renderable": {
-          "glyph": "o",
-          "fg": "#00bfff",
-          "bg": "#000000",
-          "layer": 1
+        { "Name": "Orc" },
+        {
+          "Health": { "max_hp": 30 }
+        },
+        { "Attack": { "damage": 10 } },
+        { "Viewer": { "range": 8 } },
+        { "Blocker": {} },
+        {
+          "Renderable": {
+            "glyph": "o",
+            "fg": "#00bfff",
+            "bg": "#000000",
+            "layer": 1
+          }
         }
-      }
-    ],
+      ],
       [
-      { "Name": "Orc Archer" },
-      {
-        "Health": { "max_hp": 20 }
-      },
-      { "Attack": { "damage": 8 } },
-      { "Viewer": { "range": 8 } },
-      { "Blocker": {} },
-      {
-        "Renderable": {
-          "glyph": "o",
-          "fg": "#ffbf00",
-          "bg": "#000000",
-          "layer": 1
+        { "Name": "Orc Archer" },
+        {
+          "Health": { "max_hp": 20 }
+        },
+        { "Attack": { "damage": 8 } },
+        { "Viewer": { "range": 8 } },
+        { "Blocker": {} },
+        {
+          "Renderable": {
+            "glyph": "o",
+            "fg": "#ffbf00",
+            "bg": "#000000",
+            "layer": 1
+          }
+        },
+        {
+          "Skilled": {
+            "skills": ["ShootBow"]
+          }
         }
-      },
-      {
-        "Skilled": {
-          "skills": ["ShootBow"]
-        }
-      }
-    ]
+      ]
     ],
     "1": [
       [
-      { "Name": "Orc Lvl 2" },
-      {
-        "Health": { "max_hp": 20 }
-      },
-      { "Attack": { "damage": 8 } },
-      { "Viewer": { "range": 8 } },
-      { "Blocker": {} },
-      {
-        "Renderable": {
-          "glyph": "o",
-          "fg": "#ffbfff",
-          "bg": "#000000",
-          "layer": 1
+        { "Name": "Orc Lvl 2" },
+        {
+          "Health": { "max_hp": 20 }
+        },
+        { "Attack": { "damage": 8 } },
+        { "Viewer": { "range": 8 } },
+        { "Blocker": {} },
+        {
+          "Renderable": {
+            "glyph": "o",
+            "fg": "#ffbfff",
+            "bg": "#000000",
+            "layer": 1
+          }
         }
-      }
-    ]
+      ]
     ]
   },
   "items": {
-    "0":[
+    "0": [
       [
-      { "Name": "Simple Wooden Sword" },
-      {
-        "Renderable": {
-          "glyph": "/",
-          "fg": "#a52a2a",
-          "bg": "#000000",
-          "layer": 0
+        { "Name": "Simple Wooden Sword" },
+        {
+          "Renderable": {
+            "glyph": "/",
+            "fg": "#a52a2a",
+            "bg": "#000000",
+            "layer": 0
+          }
+        },
+        {
+          "Blueprint": {
+            "img": "Sword"
+          }
         }
-      },
-      {
-        "Blueprint": {
-          "img": "Sword"
-        }
-      }
-    ]
+      ]
     ],
-    "1":[
+    "1": [
       [
-      { "Name": "Simple Wooden Sword v2" },
-      {
-        "Renderable": {
-          "glyph": "/",
-          "fg": "#a52aff",
-          "bg": "#000000",
-          "layer": 0
+        { "Name": "Simple Wooden Sword v2" },
+        {
+          "Renderable": {
+            "glyph": "/",
+            "fg": "#a52aff",
+            "bg": "#000000",
+            "layer": 0
+          }
+        },
+        {
+          "Blueprint": {
+            "img": "Sword"
+          }
         }
-      },
-      {
-        "Blueprint": {
-          "img": "Sword"
-        }
-      }
-    ]
+      ]
     ]
   }
 }
