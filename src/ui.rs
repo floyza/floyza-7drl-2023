@@ -158,9 +158,69 @@ pub fn draw_message_log(state: &State, ctx: &mut BTerm) {
 }
 
 #[derive(Debug, Clone)]
+pub struct ConfUIState {
+    pub query: String,
+    pub selection: bool,
+}
+
+#[derive(Debug, Clone)]
+pub enum ConfUIRes {
+    Yes,
+    No,
+}
+
+pub fn update_confirmation_ui(
+    mut ui_state: ConfUIState,
+    _state: &mut State,
+    command: Command,
+) -> (Option<ConfUIRes>, ConfUIState) {
+    match command {
+        Command::Move {
+            target: Point { x: 0, y: -1 },
+        } => {
+            ui_state.selection = true;
+        }
+        Command::Move {
+            target: Point { x: 0, y: 1 },
+        } => {
+            ui_state.selection = false;
+        }
+        Command::Select => {
+            if ui_state.selection {
+                return (Some(ConfUIRes::Yes), ui_state);
+            } else {
+                return (Some(ConfUIRes::No), ui_state);
+            }
+        }
+        Command::Back => {
+            return (Some(ConfUIRes::No), ui_state);
+        }
+        _ => {}
+    }
+    (None, ui_state)
+}
+
+pub fn draw_confirmation_ui(ui_state: &ConfUIState, state: &State, ctx: &mut BTerm) {
+    let width = ui_state.query.len() as i32 + 4;
+    let height = 5;
+    let x = (state.size.x - width) / 2;
+    let y = (state.size.y - height) / 2;
+    ctx.draw_box(x, y, width, height, RGB::named(WHITE), RGB::named(BLACK));
+    ctx.print(x + 2, y + 1, &ui_state.query);
+    if ui_state.selection {
+        ctx.print(x + 1, y + 2, ">yes");
+        ctx.print(x + 1, y + 3, " no");
+    } else {
+        ctx.print(x + 1, y + 2, " yes");
+        ctx.print(x + 1, y + 3, ">no");
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct InvUIState {
     pub selection: u32,
     pub length: u32,
+    pub confirming: Option<ConfUIState>,
 }
 
 #[derive(Debug, Clone)]
@@ -170,33 +230,63 @@ pub enum InvUIRes {
 }
 
 pub fn update_inventory_ui(
-    mut state: InvUIState,
+    mut ui_state: InvUIState,
+    state: &mut State,
     command: Command,
 ) -> (Option<InvUIRes>, InvUIState) {
+    if let Some(confirming) = ui_state.confirming {
+        let (res, state2) = update_confirmation_ui(confirming, state, command);
+        match res {
+            Some(ConfUIRes::Yes) => {
+                ui_state.confirming = None;
+                return (Some(InvUIRes::Select(ui_state.selection)), ui_state);
+            }
+            Some(ConfUIRes::No) => {
+                ui_state.confirming = None;
+                return (None, ui_state);
+            }
+            None => {
+                ui_state.confirming = Some(state2);
+                return (None, ui_state);
+            }
+        }
+    }
     match command {
         Command::Move {
             target: Point { x: 0, y: -1 },
         } => {
-            if state.selection > 0 {
-                state.selection -= 1;
+            if ui_state.selection > 0 {
+                ui_state.selection -= 1;
             }
         }
         Command::Move {
             target: Point { x: 0, y: 1 },
         } => {
-            if state.selection + 1 < state.length {
-                state.selection += 1;
+            if ui_state.selection + 1 < ui_state.length {
+                ui_state.selection += 1;
             }
         }
         Command::Back => {
-            return (Some(InvUIRes::Done), state);
+            return (Some(InvUIRes::Done), ui_state);
         }
         Command::Select => {
-            return (Some(InvUIRes::Select(state.selection)), state);
+            let p = state
+                .ecs
+                .query_one_mut::<&Player>(state.player_entity)
+                .unwrap();
+            console::log(format!("{:?}", p.current_blueprint));
+            if p.current_blueprint.is_some() {
+                ui_state.confirming = Some(ConfUIState {
+                    query: "Are you sure? This will delete the existing blueprint.".to_owned(),
+                    selection: false,
+                });
+            } else {
+                return (Some(InvUIRes::Select(ui_state.selection)), ui_state);
+            }
         }
         _ => {}
     }
-    return (None, state);
+    return (None, ui_state);
 }
 
 pub fn draw_inventory_ui(ui_state: &InvUIState, state: &State, ctx: &mut BTerm) {
@@ -236,6 +326,9 @@ pub fn draw_inventory_ui(ui_state: &InvUIState, state: &State, ctx: &mut BTerm) 
             );
         }
         ctx.print(x + 2, line, name);
+    }
+    if let Some(confirming) = &ui_state.confirming {
+        draw_confirmation_ui(confirming, state, ctx);
     }
 }
 

@@ -89,6 +89,7 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
             state.operating_mode = OperatingMode::OpenInventory(ui::InvUIState {
                 selection: 0,
                 length: inv.contents.len() as u32,
+                confirming: None,
             });
             false
         }

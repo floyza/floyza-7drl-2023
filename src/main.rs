@@ -109,7 +109,7 @@ impl GameState for State {
                 }
                 OperatingMode::OpenInventory(s) => {
                     if let Some(command) = mapping::get_command(ctx) {
-                        let (ret, s) = ui::update_inventory_ui(s.clone(), command);
+                        let (ret, s) = ui::update_inventory_ui(s.clone(), self, command);
                         if let Some(ret) = ret {
                             match ret {
                                 ui::InvUIRes::Select(idx) => {
