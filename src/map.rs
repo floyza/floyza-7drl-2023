@@ -100,7 +100,7 @@ impl Map {
 
         let mut rooms = Vec::<Rect>::new();
 
-        for _i in 0..11 {
+        for _i in 0..15 {
             let new_room = loop {
                 let room_center = (rng.range(10, WIDTH - 10), rng.range(10, HEIGHT - 10));
                 let width = rng.range(5, 9);
