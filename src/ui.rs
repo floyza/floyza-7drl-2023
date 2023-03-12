@@ -554,7 +554,7 @@ pub fn draw_inventory_ui(ui_state: &InvUIState, state: &State, ctx: &mut BTerm) 
     let w = 30;
     let h = 20;
     ctx.draw_box(x, y, w, h, RGB::named(WHITE), RGB::named(BLACK));
-    ctx.print_centered_at(x + w / 2, y, "Inventory");
+    ctx.print_centered_at(x + w / 2, y, "Artifacts");
     let mut inv_query = state
         .ecs
         .query_one::<&Inventory>(state.player_entity)
