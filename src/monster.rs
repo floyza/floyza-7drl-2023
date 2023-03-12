@@ -106,3 +106,29 @@ pub fn spawn_monster(state: &mut State, dl: i32, pos: Point) -> Entity {
         .unwrap();
     entity
 }
+
+pub fn spawn_monster_idx(state: &mut State, dl: i32, pos: Point, idx: usize) -> Entity {
+    let entity = state.ecs.spawn(());
+    {
+        let raws = RAWS.lock().unwrap();
+        let monsters = &raws.monsters[&dl];
+        let monster_of_choice = idx;
+        for component in monsters[monster_of_choice].iter() {
+            component.clone().insert(&mut state.ecs, entity).unwrap();
+        }
+    }
+    state
+        .ecs
+        .insert(
+            entity,
+            (
+                Monster { tracking: None },
+                Position(pos),
+                Ephermal,
+                Blocker {},
+                Rank(dl),
+            ),
+        )
+        .unwrap();
+    entity
+}

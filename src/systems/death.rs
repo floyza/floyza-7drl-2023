@@ -36,6 +36,8 @@ pub fn system_kill_dead(state: &mut State) {
         }
     }
     for essence in reaped_essence {
-        gain_essence(state, essence);
+        if essence.power <= 2 && essence.power >= 0 {
+            gain_essence(state, essence);
+        }
     }
 }

@@ -6,9 +6,9 @@ Also, they shouldn't be omniscient and be able to route around the whole map to 
 * DONE make slowed enemies move slower + blue bg
 * DONE ui for examining equipment
 * WAIT find cause of pathfinding slowdown
-* change color scheme
+* DONE change color scheme
 * you forge a __ uses wrong name
 * IMPORTANT
 ** DONE main menu
 plus help file
-** numpad test
+** DONE numpad test

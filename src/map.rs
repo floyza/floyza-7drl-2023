@@ -1,8 +1,10 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    components::*, item::spawn_item, monster::spawn_monster, ui, OperatingMode, WINDOW_HEIGHT,
-    WINDOW_WIDTH,
+    components::*,
+    item::spawn_item,
+    monster::{spawn_monster, spawn_monster_idx},
+    ui, OperatingMode, WINDOW_HEIGHT, WINDOW_WIDTH,
 };
 use bracket_lib::prelude::*;
 use hecs::{Entity, Satisfies};
@@ -236,8 +238,22 @@ pub fn random_room_point(map: &Map, rng: &mut RandomNumberGenerator) -> Point {
 }
 
 pub fn populate_map_last_level(state: &mut State) {
-    let boss = spawn_monster(state, 666, state.map.rooms[1].center());
-    state.turn_order.push_back(boss);
+    let fire = spawn_monster_idx(
+        state,
+        666,
+        state.map.rooms[1].center() + Point::new(0, -4),
+        0,
+    );
+    let air = spawn_monster_idx(state, 666, state.map.rooms[1].center(), 1);
+    let water = spawn_monster_idx(
+        state,
+        666,
+        state.map.rooms[1].center() + Point::new(0, 4),
+        2,
+    );
+    state.turn_order.push_back(fire);
+    state.turn_order.push_back(air);
+    state.turn_order.push_back(water);
 }
 
 pub fn populate_map(state: &mut State) {
@@ -275,13 +291,8 @@ pub fn populate_map(state: &mut State) {
     }
 }
 
-pub fn item_fill_last_level(state: &mut State) {
-    // spawn_item(state, 666, state.map.rooms[1].center());
-}
-
 pub fn item_fill_map(state: &mut State) {
     if state.map.depth == 5 {
-        item_fill_last_level(state);
         return;
     }
     let mut new_items: Vec<Point> = Vec::new();
@@ -338,11 +349,15 @@ pub fn draw_map(state: &State, ctx: &mut BTerm) {
                 match tile {
                     Tile::Floor => {
                         glyph = to_cp437('.');
-                        fg = RGB::from_f32(0.0, 0.5, 0.5);
+                        fg = RGB::from_hex("#cdb5cd").unwrap();
                     }
                     Tile::Wall => {
                         glyph = to_cp437('#');
-                        fg = RGB::from_f32(0., 1., 0.);
+                        if state.map.depth == 5 {
+                            fg = RGB::from_hex("#8a2be2").unwrap();
+                        } else {
+                            fg = RGB::from_hex("#838b83").unwrap();
+                        }
                     }
                     Tile::Stairs => {
                         glyph = to_cp437('>');

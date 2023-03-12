@@ -194,7 +194,26 @@
     ],
     "666": [
       [
-        { "Name": "Elemental Incarnate" },
+        { "Name": "Incarnation of Fire" },
+        {
+          "Health": { "max_hp": 30 }
+        },
+        { "Attack": { "damage": 14 } },
+        { "Viewer": { "range": 8 } },
+        {
+          "Renderable": {
+            "glyph": "O",
+            "fg": "#ff69b4",
+            "bg": "#000000",
+            "layer": 1
+          }
+        },
+        {
+          "Elemental": "Fire"
+        }
+      ],
+      [
+        { "Name": "Incarnation of Air" },
         {
           "Health": { "max_hp": 30 }
         },
@@ -203,18 +222,37 @@
         {
           "Renderable": {
             "glyph": "O",
-            "fg": "#ff00ff",
+            "fg": "#7fffd4",
+            "bg": "#000000",
+            "layer": 1
+          }
+        },
+        {
+          "Skilled": {
+            "skills": [[5.0, "ShootBow"]]
+          }
+        },
+        {
+          "Elemental": "Air"
+        }
+      ],
+      [
+        { "Name": "Incarnation of Water" },
+        {
+          "Health": { "max_hp": 10 }
+        },
+        { "Attack": { "damage": 20 } },
+        { "Viewer": { "range": 8 } },
+        {
+          "Renderable": {
+            "glyph": "O",
+            "fg": "#00cd00",
             "bg": "#000000",
             "layer": 1
           }
         },
         {
           "Elemental": "Water"
-        },
-        {
-          "Skilled": {
-            "skills": [[0.2, "ShootBow"]]
-          }
         }
       ]
     ]
