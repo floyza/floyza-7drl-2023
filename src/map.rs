@@ -169,6 +169,54 @@ impl Map {
         map
     }
 
+    pub fn make_last_room(_rng: &mut RandomNumberGenerator) -> Map {
+        const WIDTH: i32 = 50;
+        const HEIGHT: i32 = 20;
+        const SIZE: usize = (WIDTH * HEIGHT) as usize;
+        let mut map = Map {
+            depth: 5,
+            tiles: vec![Tile::Wall; SIZE],
+            rooms: Vec::new(),
+            width: WIDTH,
+            height: HEIGHT,
+            visible_tiles: vec![false; SIZE],
+            revealed_tiles: vec![false; SIZE],
+            blocked_tiles: vec![false; SIZE],
+            tile_contents: vec![Vec::new(); SIZE],
+        };
+
+        let mut rooms = vec![];
+        let starting_room = Rect::with_size(7, 7, 6, 6);
+        rooms.push(starting_room);
+
+        let grand_room = Rect::with_size(20, 5, 15, 10);
+        rooms.push(grand_room);
+
+        for x in 10..30 {
+            let idx1 = map.point2d_to_index(Point::new(x, HEIGHT / 2));
+            let idx2 = map.point2d_to_index(Point::new(x, HEIGHT / 2 - 1));
+            map.tiles[idx1] = Tile::Floor;
+            map.tiles[idx2] = Tile::Floor;
+        }
+
+        // carve out rooms
+        for room in rooms.iter() {
+            room.for_each(|p| {
+                let i = map.point2d_to_index(p);
+                map.tiles[i] = Tile::Floor;
+            });
+        }
+
+        let idx = map.point2d_to_index(Point::new(35, 5));
+        map.tiles[idx] = Tile::Floor;
+        let idx = map.point2d_to_index(Point::new(36, 5));
+        map.tiles[idx] = Tile::Stairs;
+
+        map.rooms = rooms;
+
+        map
+    }
+
     pub fn is_available_exit(&self, i: usize) -> bool {
         self.in_bounds(self.index_to_point2d(i)) && !self.blocked_tiles[i]
     }
@@ -185,6 +233,9 @@ pub fn random_room_point(map: &Map, rng: &mut RandomNumberGenerator) -> Point {
 }
 
 pub fn populate_map(state: &mut State) {
+    if state.map.depth == 5 {
+        return;
+    }
     let mut new_monsters: Vec<Point> = Vec::new();
     let mut count = 0;
     loop {
@@ -216,6 +267,9 @@ pub fn populate_map(state: &mut State) {
 }
 
 pub fn item_fill_map(state: &mut State) {
+    if state.map.depth == 5 {
+        return;
+    }
     let mut new_items: Vec<Point> = Vec::new();
     let mut count = 0;
     if state.map.depth == 0 {
@@ -324,7 +378,15 @@ fn draw_entities(state: &State, ctx: &mut BTerm, offset: Point) {
 }
 
 pub fn new_floor(state: &mut State) {
-    let new_map = Map::new(state.map.depth + 1, &mut state.rng);
+    let new_map;
+    if state.map.depth == 5 {
+        // we beat the game!!
+        return;
+    } else if state.map.depth == 4 {
+        new_map = Map::make_last_room(&mut state.rng);
+    } else {
+        new_map = Map::new(state.map.depth + 1, &mut state.rng);
+    }
     state.map = new_map;
     let (position, viewer, health) = state
         .ecs

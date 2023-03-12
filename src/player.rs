@@ -129,10 +129,6 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
             let idx = state.map.point2d_to_index(player_pos.0);
             if state.map.tiles[idx] == map::Tile::Stairs {
                 state.messages.enqueue_message("You descend the stairs.");
-                if state.map.depth == 4 {
-                    // we have reached the end
-                    panic!("last room not ready yet");
-                }
                 map::new_floor(state);
                 return true;
             }

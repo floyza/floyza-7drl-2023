@@ -242,19 +242,20 @@ fn main() -> BError {
 
     let mut rng = RandomNumberGenerator::new();
     let mut world = World::new();
-    let map = map::Map::new(0, &mut rng);
+    // let map = map::Map::new(0, &mut rng);
+    let map = map::Map::make_last_room(&mut rng);
     let player_pos = map.rooms[0].center();
-    let bp: Blueprint = serde_json::from_str(
-        r##"{ "img": "Armor", "equipment": "Armor", "filled": [[0, {"element":"Water", "power":2}]] }"##,
-    )
-    .unwrap();
-    let equip = equipment::build_blueprint(&bp);
+    // let bp: Blueprint = serde_json::from_str(
+    //     r##"{ "img": "Armor", "equipment": "Armor", "filled": [[0, {"element":"Water", "power":2}]] }"##,
+    // )
+    // .unwrap();
+    // let equip = equipment::build_blueprint(&bp);
     let player_entity = world.spawn((
         Health { max_hp: 30, hp: 30 },
         Position(player_pos),
         Player {
             current_blueprint: None,
-            passive_equipment: vec![Some(equip)],
+            passive_equipment: vec![],
             active_equipment: vec![],
         },
         Viewer {
