@@ -54,12 +54,12 @@ pub fn monster_act(state: &mut State, entity: Entity) {
         let step_idx = path.steps[1];
         let pt = state.map.index_to_point2d(step_idx);
         if pt == player_pos {
-            let (name, attack) = state
-                .ecs
-                .query_one_mut::<(&Name, Option<&Attack>)>(entity)
-                .unwrap();
+            let attack = state.ecs.query_one_mut::<Option<&Attack>>(entity).unwrap();
             if let Some(attack) = attack {
                 let damage = attack.damage;
+                let blocked = execute_defence_effects(state, entity);
+                let damage = damage - blocked;
+                let name = state.ecs.query_one_mut::<&Name>(entity).unwrap();
                 state
                     .messages
                     .enqueue_message(&format!("The {} hits you for {} damage.", name.0, damage));
@@ -68,7 +68,6 @@ pub fn monster_act(state: &mut State, entity: Entity) {
                     .query_one_mut::<&mut Health>(state.player_entity)
                     .unwrap();
                 player_hp.hp -= damage;
-                execute_defence_effects(state, entity);
             }
         } else {
             pos.0 = pt;

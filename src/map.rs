@@ -189,10 +189,14 @@ pub fn populate_map(state: &mut State) {
     let mut count = 0;
     loop {
         let pt = random_room_point(&state.map, &mut state.rng);
+        if state.map.depth == 0 && state.map.rooms[0].point_in_rect(pt) {
+            // avoid spawning monsters in starting room
+            continue;
+        }
         if !new_monsters.contains(&pt) {
             new_monsters.push(pt);
             count += 1;
-            if count > 20 {
+            if count >= 15 {
                 break;
             }
         }
@@ -214,18 +218,22 @@ pub fn populate_map(state: &mut State) {
 pub fn item_fill_map(state: &mut State) {
     let mut new_items: Vec<Point> = Vec::new();
     let mut count = 0;
-    loop {
-        let room_idx = state.rng.range(0, state.map.rooms.len());
-        let room = state.map.rooms[room_idx];
+    if state.map.depth == 0 {
+        // guarantee a item in the starting room
+        let room = state.map.rooms[0];
         debug_assert!(room.x1 <= room.x2);
         debug_assert!(room.y1 <= room.y2);
         let item_x = state.rng.range(room.x1, room.x2);
         let item_y = state.rng.range(room.y1, room.y2);
         let pt = Point::new(item_x, item_y);
+        new_items.push(pt);
+    }
+    loop {
+        let pt = random_room_point(&state.map, &mut state.rng);
         if !new_items.contains(&pt) {
             new_items.push(pt);
             count += 1;
-            if count > 10 {
+            if count >= 3 {
                 break;
             }
         }

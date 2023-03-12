@@ -76,18 +76,19 @@ fn armor_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
     );
     builder
         .fg(RGB::named(WHITE))
-        .line_wrap("your attacker when hit.");
+        .line_wrap("your attacker when hit, and also block damage.");
 }
 
 fn grapple_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
     builder.fg(RGB::named(WHITE)).line_wrap("Yank");
     colorize_print_element(
-        "an enemy, damaging it as you do so.",
-        "one enemy all the way to you.",
-        "enemies chain-lightning style.",
+        "and damage an enemy, bringing it",
+        "one enemy all the way.",
+        "enemies chain-lightning style",
         ess[0].clone(),
         builder,
     );
+    builder.fg(RGB::named(WHITE)).append("to you.");
 }
 
 #[derive(Debug, Clone)]
@@ -112,7 +113,7 @@ impl fmt::Debug for ActiveEquipment {
 #[derive(Clone)]
 pub enum PassiveEquipment {
     AttackEffect(fn(&mut State, Entity, &Vec<Essence>)),
-    GotHitEffect(fn(&mut State, Entity, &Vec<Essence>)),
+    GotHitEffect(fn(&mut State, Entity, &Vec<Essence>) -> i32),
 }
 
 impl fmt::Debug for PassiveEquipment {
@@ -167,7 +168,7 @@ pub fn execute_attack_effects(state: &mut State, target: Entity) {
     }
 }
 
-pub fn execute_defence_effects(state: &mut State, target: Entity) {
+pub fn execute_defence_effects(state: &mut State, target: Entity) -> i32 {
     let player = state
         .ecs
         .query_one_mut::<&mut Player>(state.player_entity)
@@ -182,10 +183,11 @@ pub fn execute_defence_effects(state: &mut State, target: Entity) {
             equip.push((i, eq_maybe.take().unwrap()));
         }
     }
+    let mut blocked = 0;
     for (i, eq) in equip {
         let EquipmentEffect::Passive(PassiveEquipment::GotHitEffect(eff)) =
                                 eq.effect else {panic!()};
-        eff(state, target, &eq.ingredients.1);
+        blocked += eff(state, target, &eq.ingredients.1);
         let player = state
             .ecs
             .query_one_mut::<&mut Player>(state.player_entity)
@@ -193,6 +195,7 @@ pub fn execute_defence_effects(state: &mut State, target: Entity) {
         debug_assert!(player.passive_equipment[i].is_none());
         player.passive_equipment[i] = Some(eq);
     }
+    return blocked;
 }
 
 pub fn build_blueprint(bp: &Blueprint) -> Equipment {
@@ -205,8 +208,14 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
             debug_assert!(gems.len() == 1);
             let eff = match gems[0].element {
                 Elemental::Fire => |s: &mut State, e, gems: &Vec<Essence>| {
-                    let health = s.ecs.query_one_mut::<&mut Health>(e).unwrap();
-                    health.hp -= (gems[0].power + 1) * 2;
+                    let (health, name) = s.ecs.query_one_mut::<(&mut Health, &Name)>(e).unwrap();
+                    let dam = (gems[0].power + 1) * 2;
+                    health.hp -= dam;
+                    s.messages.enqueue_message(&format!(
+                        "Your armor hits the attacking {} for {} damage.",
+                        name.0, dam
+                    ));
+                    return gems[0].power + 1;
                 },
                 Elemental::Water => |s: &mut State, e, gems: &Vec<Essence>| {
                     s.ecs
@@ -217,6 +226,10 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                             },
                         )
                         .unwrap();
+                    let name = s.ecs.query_one_mut::<&Name>(e).unwrap();
+                    s.messages
+                        .enqueue_message(&format!("Your armor slows the attacking {}.", name.0,));
+                    return gems[0].power + 1;
                 },
                 Elemental::Air => |s: &mut State, e, gems: &Vec<Essence>| {
                     let player_pos = s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
@@ -224,6 +237,12 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                     let dest =
                         target_pos + normalize_pt(target_pos - player_pos) * (gems[0].power + 1);
                     push_entity_in_line_to(s, e, dest);
+                    let name = s.ecs.query_one_mut::<&Name>(e).unwrap();
+                    s.messages.enqueue_message(&format!(
+                        "Your armor blasts back the attacking {}.",
+                        name.0,
+                    ));
+                    return gems[0].power + 1;
                 },
             };
             let eff = EquipmentEffect::Passive(PassiveEquipment::GotHitEffect(eff));
@@ -236,8 +255,13 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
             debug_assert!(gems.len() == 1);
             let eff = match gems[0].element {
                 Elemental::Fire => |s: &mut State, e, gems: &Vec<Essence>| {
-                    let health = s.ecs.query_one_mut::<&mut Health>(e).unwrap();
-                    health.hp -= (gems[0].power + 1) * 5;
+                    let (health, name) = s.ecs.query_one_mut::<(&mut Health, &Name)>(e).unwrap();
+                    let dam = (gems[0].power + 1) * 5;
+                    health.hp -= dam;
+                    s.messages.enqueue_message(&format!(
+                        "Your sword flames, dealing {} extra damage to the {}.",
+                        dam, name.0
+                    ));
                 },
                 Elemental::Water => |s: &mut State, e, gems: &Vec<Essence>| {
                     s.ecs
@@ -248,6 +272,11 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                             },
                         )
                         .unwrap();
+                    let name = s.ecs.query_one_mut::<&Name>(e).unwrap();
+                    s.messages.enqueue_message(&format!(
+                        "Your sword glistens with ice, slowing the {}.",
+                        name.0
+                    ));
                 },
                 Elemental::Air => |s: &mut State, e, gems: &Vec<Essence>| {
                     let player_pos = s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
@@ -255,6 +284,9 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                     let dest =
                         target_pos + normalize_pt(target_pos - player_pos) * (gems[0].power + 1);
                     push_entity_in_line_to(s, e, dest);
+                    let name = s.ecs.query_one_mut::<&Name>(e).unwrap();
+                    s.messages
+                        .enqueue_message(&format!("Your sword blows back the {}.", name.0));
                 },
             };
             let eff = EquipmentEffect::Passive(PassiveEquipment::AttackEffect(eff));
@@ -273,7 +305,13 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                         let dest = pt + normalize_pt(player_pos - pt) * (gems[0].power + 1);
                         push_entity_in_line_to(s, e, dest);
                         let health = s.ecs.query_one_mut::<&mut Health>(e).unwrap();
-                        health.hp -= (gems[0].power + 1) * 1;
+                        let dam = (gems[0].power + 1) * 1;
+                        health.hp -= dam;
+                        let name = s.ecs.query_one_mut::<&Name>(e).unwrap();
+                        s.messages.enqueue_message(&format!(
+                            "You hook the {} and deal {dam} damage.",
+                            name.0
+                        ));
                     }
                 },
                 Elemental::Water => |s: &mut State, pt, _gems: &Vec<Essence>| {
@@ -281,6 +319,9 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                         let player_pos =
                             s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
                         push_entity_in_line_to(s, e, player_pos);
+                        let name = s.ecs.query_one_mut::<&Name>(e).unwrap();
+                        s.messages
+                            .enqueue_message(&format!("You hook the {}.", name.0));
                     }
                 },
                 Elemental::Air => |s: &mut State, mut pt, gems: &Vec<Essence>| {
@@ -311,7 +352,17 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                             break;
                         }
                     }
+                    let mut first = true;
                     for (e, dest) in targets {
+                        let name = s.ecs.query_one_mut::<&Name>(e).unwrap();
+                        if first {
+                            s.messages
+                                .enqueue_message(&format!("You hook the {}...", name.0));
+                            first = false;
+                        } else {
+                            s.messages
+                                .enqueue_message(&format!("...and the {}...", name.0));
+                        }
                         push_entity_in_line_to(s, e, dest);
                     }
                 },
