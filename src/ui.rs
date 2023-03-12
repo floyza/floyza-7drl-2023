@@ -192,7 +192,26 @@ pub fn draw_message_log(state: &State, ctx: &mut BTerm) {
     }
 }
 
-#[derive(Debug, Clone)]
+pub fn update_main_menu(command: Command) -> bool {
+    match command {
+        Command::Select => {
+            return true;
+        }
+        _ => {}
+    }
+    return false;
+}
+
+pub fn draw_main_menu(_state: &State, ctx: &mut BTerm) {
+    let x = 5;
+    let y = 5;
+    let w = WINDOW_WIDTH - 10;
+    let h = WINDOW_HEIGHT - 10;
+    ctx.draw_box(x, y, w, h, RGB::named(WHITE), RGB::named(BLACK));
+    ctx.print(x + 2, y + 2, "Game start!");
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct ConfUIState {
     pub query: String,
     pub selection: bool,
@@ -251,7 +270,7 @@ pub fn draw_confirmation_ui(ui_state: &ConfUIState, ctx: &mut BTerm) {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct InvUIState {
     pub selection: u32,
     pub length: u32,
@@ -366,7 +385,7 @@ pub fn draw_inventory_ui(ui_state: &InvUIState, state: &State, ctx: &mut BTerm) 
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ExamineUIState {
     /// relative to map display window
     pub point: Point,

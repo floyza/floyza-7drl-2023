@@ -8,7 +8,7 @@ use map::{item_fill_map, populate_map};
 use messages::MessageLog;
 use monster::monster_act;
 use systems::*;
-use ui::ExamineUIRes;
+use ui::{draw_main_menu, update_main_menu, ExamineUIRes};
 
 pub mod blueprint;
 pub mod components;
@@ -44,6 +44,7 @@ pub struct State {
     pub debug: bool,
 }
 
+#[derive(Debug, PartialEq)]
 pub enum OperatingMode {
     WaitingForInput,
     Ticking,
@@ -54,6 +55,9 @@ pub enum OperatingMode {
         state: ui::ExamineUIState,
         equipment: usize,
     },
+    MainMenu,
+    GameOver,
+    GameWon,
 }
 
 impl State {
@@ -78,6 +82,15 @@ impl State {
             OperatingMode::OpenExamine(s) => ui::draw_examine_ui(s, self, ctx),
             OperatingMode::EquipmentTargetting { state: s, .. } => {
                 ui::draw_examine_ui(s, self, ctx)
+            }
+            OperatingMode::MainMenu => {
+                draw_main_menu(self, ctx);
+            }
+            OperatingMode::GameOver => {
+                todo!();
+            }
+            OperatingMode::GameWon => {
+                todo!();
             }
         }
     }
@@ -126,7 +139,10 @@ impl GameState for State {
                         let player_used_turn = player::player_act(self, &command);
                         if player_used_turn {
                             self.turn_order.rotate_left(1);
-                            self.operating_mode = OperatingMode::Ticking;
+                            if self.operating_mode == OperatingMode::WaitingForInput {
+                                // if unchanged
+                                self.operating_mode = OperatingMode::Ticking;
+                            }
                         }
                         // self.run_systems();
                     } else {
@@ -230,6 +246,30 @@ impl GameState for State {
                         break;
                     }
                 }
+                OperatingMode::MainMenu => {
+                    if let Some(command) = mapping::get_command(ctx) {
+                        let res = update_main_menu(command);
+                        if res {
+                            self.operating_mode = OperatingMode::Ticking;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                OperatingMode::GameOver => {
+                    if let Some(command) = mapping::get_command(ctx) {
+                        todo!();
+                    } else {
+                        break;
+                    }
+                }
+                OperatingMode::GameWon => {
+                    if let Some(command) = mapping::get_command(ctx) {
+                        todo!();
+                    } else {
+                        break;
+                    }
+                }
             }
         }
         self.render(ctx);
@@ -288,7 +328,7 @@ fn main() -> BError {
         },
         has_moved: false,
         turn_order: VecDeque::new(),
-        operating_mode: OperatingMode::Ticking,
+        operating_mode: OperatingMode::MainMenu,
         debug: true,
     };
 

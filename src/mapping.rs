@@ -24,6 +24,7 @@ pub fn get_command(ctx: &mut BTerm) -> Option<Command> {
             }
         } else {
             match key {
+                VirtualKeyCode::D => Some(Command::DescendStairs),
                 VirtualKeyCode::H | VirtualKeyCode::Left | VirtualKeyCode::Numpad4 => {
                     Some(Command::Move {
                         target: Point::new(-1, 0),

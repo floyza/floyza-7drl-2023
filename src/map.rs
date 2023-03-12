@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use crate::{components::*, ui, WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::{components::*, ui, OperatingMode, WINDOW_HEIGHT, WINDOW_WIDTH};
 use bracket_lib::prelude::*;
 use hecs::{Entity, Satisfies};
 
@@ -381,6 +381,7 @@ pub fn new_floor(state: &mut State) {
     let new_map;
     if state.map.depth == 5 {
         // we beat the game!!
+        state.operating_mode = OperatingMode::GameWon;
         return;
     } else if state.map.depth == 4 {
         new_map = Map::make_last_room(&mut state.rng);
