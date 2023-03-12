@@ -13,6 +13,7 @@ pub enum Command {
     Select,
     CreateItem,
     UseActive(i32),
+    EquipExamine,
 }
 
 pub fn get_command(ctx: &mut BTerm) -> Option<Command> {
@@ -24,6 +25,7 @@ pub fn get_command(ctx: &mut BTerm) -> Option<Command> {
             }
         } else {
             match key {
+                VirtualKeyCode::E => Some(Command::EquipExamine),
                 VirtualKeyCode::D => Some(Command::DescendStairs),
                 VirtualKeyCode::H | VirtualKeyCode::Left | VirtualKeyCode::Numpad4 => {
                     Some(Command::Move {

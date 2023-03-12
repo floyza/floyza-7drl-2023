@@ -58,6 +58,7 @@ pub enum OperatingMode {
     MainMenu,
     GameOver,
     GameWon,
+    EquipmentExamining(ui::EquipExamineState),
 }
 
 impl State {
@@ -92,6 +93,7 @@ impl State {
             OperatingMode::GameWon => {
                 todo!();
             }
+            OperatingMode::EquipmentExamining(s) => ui::draw_equip_examine(s, self, ctx),
         }
     }
 }
@@ -181,7 +183,7 @@ impl GameState for State {
                                     } else {
                                         let name = self.ecs.query_one_mut::<&Name>(item).unwrap();
                                         self.messages.enqueue_message(&format!(
-                                            "Could not attach {}: it's not a blueprint.",
+                                            "Could not attach {}: it's not a artifact.",
                                             name.0
                                         ));
                                         self.operating_mode = OperatingMode::Ticking;
@@ -270,6 +272,18 @@ impl GameState for State {
                         break;
                     }
                 }
+                OperatingMode::EquipmentExamining(s) => {
+                    if let Some(command) = mapping::get_command(ctx) {
+                        let (done, s) = ui::update_equip_examine(s.clone(), self, command);
+                        if done {
+                            self.operating_mode = OperatingMode::Ticking;
+                        } else {
+                            self.operating_mode = OperatingMode::EquipmentExamining(s);
+                        }
+                    } else {
+                        break;
+                    }
+                }
             }
         }
         self.render(ctx);
@@ -282,20 +296,20 @@ fn main() -> BError {
 
     let mut rng = RandomNumberGenerator::new();
     let mut world = World::new();
-    // let map = map::Map::new(0, &mut rng);
-    let map = map::Map::make_last_room(&mut rng);
+    let map = map::Map::new(0, &mut rng);
+    // let map = map::Map::make_last_room(&mut rng);
     let player_pos = map.rooms[0].center();
-    // let bp: Blueprint = serde_json::from_str(
-    //     r##"{ "img": "Armor", "equipment": "Armor", "filled": [[0, {"element":"Water", "power":2}]] }"##,
-    // )
-    // .unwrap();
-    // let equip = equipment::build_blueprint(&bp);
+    let bp: Blueprint = serde_json::from_str(
+        r##"{ "img": "Armor", "equipment": "Armor", "filled": [[0, {"element":"Water", "power":2}]] }"##,
+    )
+    .unwrap();
+    let equip = equipment::build_blueprint(&bp);
     let player_entity = world.spawn((
         Health { max_hp: 30, hp: 30 },
         Position(player_pos),
         Player {
             current_blueprint: None,
-            passive_equipment: vec![],
+            passive_equipment: vec![Some(equip)],
             active_equipment: vec![],
         },
         Viewer {

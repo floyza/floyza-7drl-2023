@@ -5,6 +5,7 @@ use hecs::Entity;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    blueprint::BPImage,
     components::*,
     essence::Essence,
     math::normalize_pt,
@@ -24,6 +25,7 @@ pub enum EquipmentType {
 pub struct Equipment {
     pub ingredients: (EquipmentType, Vec<Essence>),
     pub effect: EquipmentEffect,
+    pub img: BPImage,
 }
 
 pub fn print_desc(typ: EquipmentType, ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
@@ -89,7 +91,7 @@ fn grapple_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
     builder.fg(RGB::named(WHITE)).line_wrap("Yank");
     colorize_print_element(
         "and damage an enemy, bringing it",
-        "one enemy all the way.",
+        "one enemy all the way",
         "enemies chain-lightning style",
         ess[0].clone(),
         builder,
@@ -224,14 +226,26 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                     return gems[0].power + 1;
                 },
                 Elemental::Water => |s: &mut State, e, gems: &Vec<Essence>| {
-                    s.ecs
-                        .insert_one(
-                            e,
-                            Slowed {
-                                duration: (gems[0].power as u32 + 1) * 2,
-                            },
-                        )
-                        .unwrap();
+                    let slowed = s.ecs.query_one_mut::<Option<&Slowed>>(e).unwrap().cloned();
+                    if let Some(slowed) = slowed {
+                        s.ecs
+                            .insert_one(
+                                e,
+                                Slowed {
+                                    duration: (gems[0].power as u32 + 1) * 1 + slowed.duration,
+                                },
+                            )
+                            .unwrap();
+                    } else {
+                        s.ecs
+                            .insert_one(
+                                e,
+                                Slowed {
+                                    duration: (gems[0].power as u32 + 1) * 1,
+                                },
+                            )
+                            .unwrap();
+                    }
                     let name = s.ecs.query_one_mut::<&Name>(e).unwrap();
                     s.messages
                         .enqueue_message(&format!("Your armor slows the attacking {}.", name.0,));
@@ -255,6 +269,7 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
             return Equipment {
                 ingredients: (EquipmentType::Armor, gems),
                 effect: eff,
+                img: bp.img,
             };
         }
         EquipmentType::Sword => {
@@ -270,14 +285,26 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                     ));
                 },
                 Elemental::Water => |s: &mut State, e, gems: &Vec<Essence>| {
-                    s.ecs
-                        .insert_one(
-                            e,
-                            Slowed {
-                                duration: (gems[0].power as u32 + 1) * 2,
-                            },
-                        )
-                        .unwrap();
+                    let slowed = s.ecs.query_one_mut::<Option<&Slowed>>(e).unwrap().cloned();
+                    if let Some(slowed) = slowed {
+                        s.ecs
+                            .insert_one(
+                                e,
+                                Slowed {
+                                    duration: (gems[0].power as u32 + 1) * 1 + slowed.duration,
+                                },
+                            )
+                            .unwrap();
+                    } else {
+                        s.ecs
+                            .insert_one(
+                                e,
+                                Slowed {
+                                    duration: (gems[0].power as u32 + 1) * 1,
+                                },
+                            )
+                            .unwrap();
+                    }
                     let name = s.ecs.query_one_mut::<&Name>(e).unwrap();
                     s.messages.enqueue_message(&format!(
                         "Your sword glistens with ice, slowing the {}.",
@@ -299,6 +326,7 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
             return Equipment {
                 ingredients: (EquipmentType::Sword, gems),
                 effect: eff,
+                img: bp.img,
             };
         }
         EquipmentType::Grapple => {
@@ -377,6 +405,7 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
             return Equipment {
                 ingredients: (EquipmentType::Grapple, gems),
                 effect: eff,
+                img: bp.img,
             };
         }
         EquipmentType::Gun => {}

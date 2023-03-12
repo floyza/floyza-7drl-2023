@@ -157,11 +157,11 @@ pub fn draw_current_blueprint(state: &State, ctx: &mut BTerm) {
             render_draw_buffer(ctx).unwrap();
         }
         if bp.filled.len() == bpi.gem_spots.len() {
-            ctx.print(sidebar_x + 1, offset_y + 30 + 5, "Blueprint Ready!");
-            ctx.print(sidebar_x + 1, offset_y + 30 + 5 + 1, "Press 'a' to get!");
+            ctx.print(sidebar_x + 1, offset_y + 30 + 5, "Artifact ready!");
+            ctx.print(sidebar_x + 1, offset_y + 30 + 5 + 1, "Press 'a' to forge!");
         }
     } else {
-        ctx.print(sidebar_x + 1, 1, "No active blueprint");
+        ctx.print(sidebar_x + 1, 1, "No active artifact");
     }
 }
 
@@ -209,6 +209,110 @@ pub fn draw_main_menu(_state: &State, ctx: &mut BTerm) {
     let h = WINDOW_HEIGHT - 10;
     ctx.draw_box(x, y, w, h, RGB::named(WHITE), RGB::named(BLACK));
     ctx.print(x + 2, y + 2, "Game start!");
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EquipExamineState {
+    pub selection: i32,
+    pub length: i32,
+}
+
+pub fn draw_equip_examine(ui_state: &EquipExamineState, state: &State, ctx: &mut BTerm) {
+    let mut query = state.ecs.query_one::<&Player>(state.player_entity).unwrap();
+    let player = query.get().unwrap();
+
+    let equip;
+    if ui_state.selection < player.active_equipment.len() as i32 {
+        equip = &player.active_equipment[ui_state.selection as usize];
+        ctx.set(
+            0,
+            5 + ui_state.selection,
+            RGB::named(WHITE),
+            RGB::named(BLACK),
+            to_cp437('>'),
+        );
+    } else {
+        let sel = ui_state.selection - player.active_equipment.len() as i32;
+        if !(sel < player.passive_equipment.len() as i32) {
+            return;
+        }
+        equip = &player.passive_equipment[sel as usize];
+        ctx.set(
+            0,
+            7 + ui_state.selection as i32,
+            RGB::named(WHITE),
+            RGB::named(BLACK),
+            to_cp437('>'),
+        );
+    }
+    ctx.print(SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y, "Equipped:");
+    let Some(equip) = equip else {return};
+    let bpi = equip.img.lookup();
+    ctx.render_xp_sprite(&bpi.img, SIDEBAR_EXTRA_POS.x, SIDEBAR_EXTRA_POS.y + 1);
+    for (i, slot) in equip.ingredients.1.iter().enumerate() {
+        let gem = bpi.gem_spots[i];
+        let color = match slot.element {
+            Elemental::Air => RGB::named(SKYBLUE),
+            Elemental::Water => RGB::named(BLUE3),
+            Elemental::Fire => RGB::named(RED),
+        };
+        ctx.set(
+            SIDEBAR_EXTRA_POS.x + gem.x,
+            SIDEBAR_EXTRA_POS.y + gem.y + 1,
+            color,
+            RGB::named(BLACK),
+            to_cp437('☼'),
+        );
+        let mut builder = TextBuilder::empty();
+        let ess = equip
+            .ingredients
+            .1
+            .iter()
+            .map(|x| Some(x.clone()))
+            .collect();
+        print_desc(equip.ingredients.0, &ess, &mut builder);
+        let mut block = TextBlock::new(
+            SIDEBAR_EXTRA_POS.x,
+            SIDEBAR_EXTRA_POS.y + 30,
+            LEFT_SIDEBAR_WIDTH - 2,
+            5,
+        );
+        block
+            .print(&builder)
+            .expect("Description text was too long");
+        let mut draw_batch = DrawBatch::new();
+        block.render_to_draw_batch(&mut draw_batch);
+        draw_batch.submit(0).unwrap();
+        render_draw_buffer(ctx).unwrap();
+    }
+}
+
+pub fn update_equip_examine(
+    mut ui_state: EquipExamineState,
+    _state: &mut State,
+    command: Command,
+) -> (bool, EquipExamineState) {
+    match command {
+        Command::Move {
+            target: Point { x: 0, y: -1 },
+        } => {
+            if ui_state.selection > 0 {
+                ui_state.selection -= 1;
+            };
+        }
+        Command::Move {
+            target: Point { x: 0, y: 1 },
+        } => {
+            if ui_state.selection + 1 < ui_state.length {
+                ui_state.selection += 1;
+            };
+        }
+        Command::Back => {
+            return (true, ui_state);
+        }
+        _ => {}
+    }
+    return (false, ui_state);
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -330,7 +434,7 @@ pub fn update_inventory_ui(
                 .unwrap();
             if p.current_blueprint.is_some() {
                 ui_state.confirming = Some(ConfUIState {
-                    query: "Are you sure? This will delete the existing blueprint.".to_owned(),
+                    query: "Are you sure? This will delete the existing artifact.".to_owned(),
                     selection: false,
                 });
             } else {

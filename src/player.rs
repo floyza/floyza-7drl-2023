@@ -148,13 +148,13 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
                 }
                 state
                     .messages
-                    .enqueue_message(&format!("You build a {:?}!", bp.equipment));
+                    .enqueue_message(&format!("You forge a {:?}!", bp.equipment));
                 p.current_blueprint = None;
                 return true;
             }
             state
                 .messages
-                .enqueue_message("Slots not full: cannot build yet.");
+                .enqueue_message("Slots not full: cannot forge yet.");
             false
         }
         Command::UseActive(action_idx) => {
@@ -173,6 +173,18 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
                     equipment: action_idx as usize - 1,
                 };
             }
+            false
+        }
+        Command::EquipExamine => {
+            let player = state
+                .ecs
+                .query_one_mut::<&Player>(state.player_entity)
+                .unwrap();
+            let length = player.active_equipment.len() + player.passive_equipment.len();
+            state.operating_mode = OperatingMode::EquipmentExamining(ui::EquipExamineState {
+                selection: 0,
+                length: length as i32,
+            });
             false
         }
         _ => false,
