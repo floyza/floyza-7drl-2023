@@ -1,3 +1,7 @@
-#+title: Readme
+#+title: Elemental Caverns
 
-This is my 7drl entry for 2023, in progress.
+You have arrived at the elemental caverns, the intersection of the domains of the three elements: fire, water, and air. At the bottom of it lies the source of their power, and the means to take control of it.
+The dungeon is filled with old forgotten artifacts, long drained of their power. Take them, and drain monsters of their essence to restore the artifacts to their former strength. They say that these essences are enough to alter the effects of each artifact depending on their elemental alignment.
+** About
+Elemental Caverns is 7drl built around item creation. It's written in rust with bracket-lib and hecs.
+It's also my submission for 7drl 2023. See the itch.io page here: https://floyza.itch.io/elemental-caverns.
