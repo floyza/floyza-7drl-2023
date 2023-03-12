@@ -193,6 +193,33 @@ pub fn draw_message_log(state: &State, ctx: &mut BTerm) {
     }
 }
 
+pub fn update_game_over(command: Command) -> bool {
+    match command {
+        Command::Select => true,
+        _ => false,
+    }
+}
+
+pub fn draw_game_over(ctx: &mut BTerm) {
+    let x = 4;
+    let y = 4;
+    let w = 92;
+    let h = 62;
+    ctx.draw_box(x, y, w, h, RGB::named(WHITE), RGB::named(BLACK));
+    let xpfile = XpFile::from_resource("../assets/game-over.xp").unwrap();
+    ctx.render_xp_sprite(&xpfile, x + 1, y + 1);
+}
+
+pub fn draw_game_won(ctx: &mut BTerm) {
+    let x = 4;
+    let y = 4;
+    let w = 92;
+    let h = 62;
+    ctx.draw_box(x, y, w, h, RGB::named(WHITE), RGB::named(BLACK));
+    let xpfile = XpFile::from_resource("../assets/you-won.xp").unwrap();
+    ctx.render_xp_sprite(&xpfile, x + 1, y + 1);
+}
+
 pub fn update_help(command: Command) -> bool {
     match command {
         Command::Back => return true,
@@ -712,7 +739,11 @@ pub fn draw_examine_ui(ui_state: &ExamineUIState, state: &State, ctx: &mut BTerm
 }
 
 embedded_resource!(RES_MAIN_MENU, "../assets/main-menu.xp");
+embedded_resource!(RES_GAME_OVER, "../assets/game-over.xp");
+embedded_resource!(RES_YOU_WON, "../assets/you-won.xp");
 
 pub fn load_menus_xp() {
     link_resource!(RES_MAIN_MENU, "../assets/main-menu.xp");
+    link_resource!(RES_GAME_OVER, "../assets/game-over.xp");
+    link_resource!(RES_YOU_WON, "../assets/you-won.xp");
 }

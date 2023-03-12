@@ -89,10 +89,10 @@ impl State {
                 draw_main_menu(s, self, ctx);
             }
             OperatingMode::GameOver => {
-                todo!();
+                ui::draw_game_over(ctx);
             }
             OperatingMode::GameWon => {
-                todo!();
+                ui::draw_game_won(ctx);
             }
             OperatingMode::EquipmentExamining(s) => ui::draw_equip_examine(s, self, ctx),
             OperatingMode::HelpMenu => ui::draw_help(ctx),
@@ -264,14 +264,75 @@ impl GameState for State {
                 }
                 OperatingMode::GameOver => {
                     if let Some(command) = mapping::get_command(ctx) {
-                        todo!();
+                        let done = ui::update_game_over(command);
+                        if done {
+                            let mut rng = RandomNumberGenerator::new();
+                            let mut world = World::new();
+                            let map = map::Map::new(0, &mut rng);
+                            // let map = map::Map::make_last_room(&mut rng);
+                            let player_pos = map.rooms[0].center();
+                            let player_entity = world.spawn((
+                                Health { max_hp: 30, hp: 30 },
+                                Position(player_pos),
+                                Player {
+                                    current_blueprint: None,
+                                    passive_equipment: vec![],
+                                    active_equipment: vec![],
+                                },
+                                Viewer {
+                                    visible_tiles: Vec::new(),
+                                    range: 8,
+                                    dirty: true,
+                                },
+                                Renderable {
+                                    glyph: to_cp437('@'),
+                                    fg: RGB::named(GREEN),
+                                    bg: RGB::named(BLACK),
+                                    layer: 1,
+                                },
+                                Inventory {
+                                    contents: Vec::new(),
+                                },
+                                Name("Bob".to_string()),
+                                Grower::Empty,
+                                Attack { damage: 3 },
+                            ));
+
+                            let mut state = State {
+                                ecs: world,
+                                map,
+                                player_entity,
+                                rng,
+                                messages: MessageLog {
+                                    log: Vec::new(),
+                                    current_messages: Vec::new(),
+                                },
+                                has_moved: false,
+                                turn_order: VecDeque::new(),
+                                operating_mode: OperatingMode::MainMenu(ui::MainMenuState {
+                                    selection: 0,
+                                    xpfile: XpFile::from_resource("../assets/main-menu.xp")
+                                        .unwrap(),
+                                    looking_at_help: false,
+                                }),
+                                debug: true,
+                            };
+
+                            state.turn_order.push_back(player_entity);
+
+                            populate_map(&mut state);
+                            item_fill_map(&mut state);
+                            self.ecs.clear(); // just to be safe
+                            *self = state;
+                            return;
+                        }
                     } else {
                         break;
                     }
                 }
                 OperatingMode::GameWon => {
-                    if let Some(command) = mapping::get_command(ctx) {
-                        todo!();
+                    if let Some(_command) = mapping::get_command(ctx) {
+                        break; // do nothing
                     } else {
                         break;
                     }

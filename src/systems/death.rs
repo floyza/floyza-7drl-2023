@@ -1,7 +1,7 @@
 use crate::{
     components::*,
     essence::{gain_essence, Essence},
-    State,
+    OperatingMode, State,
 };
 
 pub fn system_kill_dead(state: &mut State) {
@@ -9,11 +9,11 @@ pub fn system_kill_dead(state: &mut State) {
     let mut reaped_essence = vec![];
     for (id, (elem, rank, health)) in state
         .ecs
-        .query_mut::<(Option<&Elemental>, &Rank, &Health)>()
+        .query_mut::<(Option<&Elemental>, Option<&Rank>, &Health)>()
     {
         if health.hp <= 0 {
             dead.push(id);
-            if let Some(elem) = elem {
+            if let (Some(elem), Some(rank)) = (elem, rank) {
                 if state.rng.range(0, 4) == 0 {
                     reaped_essence.push(Essence {
                         element: elem.clone(),
@@ -25,6 +25,8 @@ pub fn system_kill_dead(state: &mut State) {
     }
     for id in dead {
         if id == state.player_entity {
+            state.messages.enqueue_message("You are DEAD.");
+            state.operating_mode = OperatingMode::GameOver;
             continue;
         }
         state.ecs.despawn(id).unwrap();
