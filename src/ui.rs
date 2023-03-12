@@ -1,14 +1,10 @@
 use crate::{
-    components::*,
-    debug,
-    equipment::{print_desc, EquipmentEffect},
-    map,
-    mapping::Command,
-    OperatingMode, State, WINDOW_HEIGHT, WINDOW_WIDTH,
+    components::*, debug, equipment::print_desc, map, mapping::Command, State, WINDOW_HEIGHT,
+    WINDOW_WIDTH,
 };
 use bracket_lib::prelude::*;
 
-pub const SIDEBAR_EXTRA_POS: Point = Point { x: 1, y: 10 };
+pub const SIDEBAR_EXTRA_POS: Point = Point { x: 1, y: 30 };
 pub const LEFT_SIDEBAR_WIDTH: i32 = 20;
 pub const RIGHT_SIDEBAR_WIDTH: i32 = 20;
 pub const MESSAGE_LOG_HEIGHT: i32 = 8;

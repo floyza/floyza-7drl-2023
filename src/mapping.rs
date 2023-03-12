@@ -1,4 +1,4 @@
-use bracket_lib::terminal::{console, BTerm, Point, VirtualKeyCode};
+use bracket_lib::terminal::{BTerm, Point, VirtualKeyCode};
 
 #[derive(Debug, Copy, Clone)]
 pub enum Command {

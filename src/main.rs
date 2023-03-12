@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use bracket_lib::prelude::*;
 use components::*;
-use equipment::{build_blueprint, execute_active_target, Equipment};
+use equipment::execute_active_target;
 use hecs::{Entity, World};
 use map::{item_fill_map, populate_map};
 use messages::MessageLog;

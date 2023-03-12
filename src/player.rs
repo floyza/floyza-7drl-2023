@@ -3,7 +3,7 @@ use hecs::With;
 
 use crate::{
     components::*,
-    equipment::{build_blueprint, execute_attack_effects, EquipmentEffect, PassiveEquipment},
+    equipment::{build_blueprint, execute_attack_effects, EquipmentEffect},
     map,
     mapping::Command,
     ui, OperatingMode, State,
@@ -27,9 +27,10 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
             {
                 let mut found_target = None;
                 for entity in state.map.tile_contents[new_idx].iter() {
-                    if let Ok((health, name)) = state
+                    if state
                         .ecs
-                        .query_one_mut::<With<(&mut Health, &Name), &Monster>>(*entity)
+                        .satisfies::<(&Health, &Name, &Monster)>(*entity)
+                        .unwrap()
                     {
                         found_target = Some(*entity);
                         break;
@@ -114,10 +115,6 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
             false
         }
         Command::OpenExamine => {
-            let player_pos = state
-                .ecs
-                .query_one_mut::<&Position>(state.player_entity)
-                .unwrap();
             state.operating_mode = OperatingMode::OpenExamine(ui::ExamineUIState {
                 point: Point::new(map::MAP_UI_DIM.width() / 2, map::MAP_UI_DIM.height() / 2),
             });
