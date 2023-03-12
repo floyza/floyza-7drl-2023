@@ -99,6 +99,20 @@ impl GameState for State {
                         if self.ecs.satisfies::<&Player>(*turn).unwrap() {
                             self.operating_mode = OperatingMode::WaitingForInput;
                         } else if self.ecs.satisfies::<&Monster>(*turn).unwrap() {
+                            if let Some(slow) = self
+                                .ecs
+                                .query_one_mut::<Option<&mut Slowed>>(*turn)
+                                .unwrap()
+                            {
+                                slow.duration -= 1;
+                                if slow.duration % 2 == 0 {
+                                    if slow.duration == 0 {
+                                        self.ecs.remove_one::<Slowed>(*turn).unwrap();
+                                    }
+                                    self.turn_order.rotate_left(1);
+                                    continue;
+                                }
+                            }
                             monster_act(self, *turn);
                             self.run_systems();
                             self.turn_order.rotate_left(1);
@@ -146,6 +160,7 @@ impl GameState for State {
                                             .unwrap();
                                         p.current_blueprint = Some(bp);
                                         inv.contents.remove(idx as usize);
+                                        self.turn_order.rotate_left(1);
                                         self.operating_mode = OperatingMode::Ticking;
                                     } else {
                                         let name = self.ecs.query_one_mut::<&Name>(item).unwrap();
@@ -229,17 +244,17 @@ fn main() -> BError {
     let mut world = World::new();
     let map = map::Map::new(0, &mut rng);
     let player_pos = map.rooms[0].center();
-    // let bp: Blueprint = serde_json::from_str(
-    //     r##"{ "img": "Sword", "equipment": "Grapple", "filled": [[0, {"element":"Water", "power":2}]] }"##,
-    // )
-    // .unwrap();
-    // let equip = build_blueprint(&bp);
+    let bp: Blueprint = serde_json::from_str(
+        r##"{ "img": "Armor", "equipment": "Armor", "filled": [[0, {"element":"Water", "power":2}]] }"##,
+    )
+    .unwrap();
+    let equip = equipment::build_blueprint(&bp);
     let player_entity = world.spawn((
         Health { max_hp: 30, hp: 30 },
         Position(player_pos),
         Player {
             current_blueprint: None,
-            passive_equipment: vec![],
+            passive_equipment: vec![Some(equip)],
             active_equipment: vec![],
         },
         Viewer {

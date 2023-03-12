@@ -6,12 +6,12 @@
         {
           "Health": { "max_hp": 6 }
         },
-        { "Attack": { "damage": 2 } },
+        { "Attack": { "damage": 3 } },
         { "Viewer": { "range": 6 } },
         {
           "Renderable": {
             "glyph": "h",
-            "fg": "#ff8c00",
+            "fg": "#ffa500",
             "bg": "#000000",
             "layer": 1
           }
@@ -26,6 +26,70 @@
           "Health": { "max_hp": 3 }
         },
         { "Attack": { "damage": 2 } },
+        { "Viewer": { "range": 8 } },
+        {
+          "Renderable": {
+            "glyph": "o",
+            "fg": "#87cefa",
+            "bg": "#000000",
+            "layer": 1
+          }
+        },
+        {
+          "Elemental": "Air"
+        },
+        {
+          "Skilled": {
+            "skills": [[1.0, "ShootBow"]]
+          }
+        }
+      ],
+      [
+        { "Name": "Dribbler" },
+        {
+          "Health": { "max_hp": 3 }
+        },
+        { "Attack": { "damage": 4 } },
+        { "Viewer": { "range": 6 } },
+        {
+          "Renderable": {
+            "glyph": "z",
+            "fg": "#adff2f",
+            "bg": "#000000",
+            "layer": 1
+          }
+        },
+        {
+          "Elemental": "Water"
+        }
+      ]
+    ],
+    "1": [
+      [
+        { "Name": "Firehound" },
+        {
+          "Health": { "max_hp": 10 }
+        },
+        { "Attack": { "damage": 5 } },
+        { "Viewer": { "range": 6 } },
+        {
+          "Renderable": {
+            "glyph": "h",
+            "fg": "#ff0000",
+            "bg": "#000000",
+            "layer": 1
+          }
+        },
+        {
+          "Elemental": "Fire"
+        }
+      ],
+      [
+        { "Name": "Windspewer" },
+        {
+          "Health": { "max_hp": 6 }
+        },
+        { "Attack": { "damage": 4 } },
         { "Viewer": { "range": 8 } },
         {
           "Renderable": {
@@ -47,14 +111,78 @@
       [
         { "Name": "Icewalker" },
         {
-          "Health": { "max_hp": 3 }
+          "Health": { "max_hp": 5 }
         },
-        { "Attack": { "damage": 4 } },
+        { "Attack": { "damage": 8 } },
         { "Viewer": { "range": 6 } },
         {
           "Renderable": {
             "glyph": "z",
-            "fg": "#20b2aa",
+            "fg": "#228b22",
+            "bg": "#000000",
+            "layer": 1
+          }
+        },
+        {
+          "Elemental": "Water"
+        }
+      ]
+    ],
+    "2": [
+      [
+        { "Name": "Infernowolf" },
+        {
+          "Health": { "max_hp": 15 }
+        },
+        { "Attack": { "damage": 8 } },
+        { "Viewer": { "range": 6 } },
+        {
+          "Renderable": {
+            "glyph": "h",
+            "fg": "#8b0000",
+            "bg": "#000000",
+            "layer": 1
+          }
+        },
+        {
+          "Elemental": "Fire"
+        }
+      ],
+      [
+        { "Name": "Galearcher" },
+        {
+          "Health": { "max_hp": 9 }
+        },
+        { "Attack": { "damage": 6 } },
+        { "Viewer": { "range": 8 } },
+        {
+          "Renderable": {
+            "glyph": "o",
+            "fg": "#0000ff",
+            "bg": "#000000",
+            "layer": 1
+          }
+        },
+        {
+          "Elemental": "Air"
+        },
+        {
+          "Skilled": {
+            "skills": [[2.0, "ShootBow"]]
+          }
+        }
+      ],
+      [
+        { "Name": "Oceanicrab" },
+        {
+          "Health": { "max_hp": 8 }
+        },
+        { "Attack": { "damage": 4 } },
+        { "Viewer": { "range": 12 } },
+        {
+          "Renderable": {
+            "glyph": "z",
+            "fg": "#006400",
             "bg": "#000000",
             "layer": 1
           }
@@ -67,6 +195,112 @@
   },
   "items": {
     "0": [
+      [
+        { "Name": "Sword" },
+        {
+          "Renderable": {
+            "glyph": "/",
+            "fg": "#696969",
+            "bg": "#000000",
+            "layer": 0
+          }
+        },
+        {
+          "Blueprint": {
+            "img": "Sword",
+            "equipment": "Sword"
+          }
+        }
+      ],
+      [
+        { "Name": "Armor" },
+        {
+          "Renderable": {
+            "glyph": "[",
+            "fg": "#8b4513",
+            "bg": "#000000",
+            "layer": 0
+          }
+        },
+        {
+          "Blueprint": {
+            "img": "Armor",
+            "equipment": "Armor"
+          }
+        }
+      ],
+      [
+        { "Name": "Grappling Hook" },
+        {
+          "Renderable": {
+            "glyph": "¿",
+            "fg": "#708090",
+            "bg": "#000000",
+            "layer": 0
+          }
+        },
+        {
+          "Blueprint": {
+            "img": "Grapple",
+            "equipment": "Grapple"
+          }
+        }
+      ]
+    ],
+    "1": [
+      [
+        { "Name": "Sword" },
+        {
+          "Renderable": {
+            "glyph": "/",
+            "fg": "#696969",
+            "bg": "#000000",
+            "layer": 0
+          }
+        },
+        {
+          "Blueprint": {
+            "img": "Sword",
+            "equipment": "Sword"
+          }
+        }
+      ],
+      [
+        { "Name": "Armor" },
+        {
+          "Renderable": {
+            "glyph": "[",
+            "fg": "#8b4513",
+            "bg": "#000000",
+            "layer": 0
+          }
+        },
+        {
+          "Blueprint": {
+            "img": "Armor",
+            "equipment": "Armor"
+          }
+        }
+      ],
+      [
+        { "Name": "Grappling Hook" },
+        {
+          "Renderable": {
+            "glyph": "¿",
+            "fg": "#708090",
+            "bg": "#000000",
+            "layer": 0
+          }
+        },
+        {
+          "Blueprint": {
+            "img": "Grapple",
+            "equipment": "Grapple"
+          }
+        }
+      ]
+    ],
+    "2": [
       [
         { "Name": "Sword" },
         {

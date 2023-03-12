@@ -58,7 +58,7 @@ pub fn monster_act(state: &mut State, entity: Entity) {
             if let Some(attack) = attack {
                 let damage = attack.damage;
                 let blocked = execute_defence_effects(state, entity);
-                let damage = damage - blocked;
+                let damage = (damage - blocked).abs();
                 let name = state.ecs.query_one_mut::<&Name>(entity).unwrap();
                 state
                     .messages

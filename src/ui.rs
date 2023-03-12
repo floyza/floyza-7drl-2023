@@ -124,7 +124,7 @@ pub fn draw_current_blueprint(state: &State, ctx: &mut BTerm) {
             let gem = bpi.gem_spots[slot.0];
             let color = match slot.1.element {
                 Elemental::Air => RGB::named(SKYBLUE),
-                Elemental::Water => RGB::named(DARKBLUE),
+                Elemental::Water => RGB::named(BLUE3),
                 Elemental::Fire => RGB::named(RED),
             };
             ctx.set(

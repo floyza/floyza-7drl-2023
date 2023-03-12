@@ -45,8 +45,14 @@ fn colorize_print_element(
     if let Some(e) = e {
         match e.element {
             Elemental::Fire => builder.fg(RGB::named(RED)).line_wrap(fire),
-            Elemental::Water => builder.fg(RGB::named(DARKBLUE)).line_wrap(water),
+            Elemental::Water => builder.fg(RGB::named(BLUE3)).line_wrap(water),
             Elemental::Air => builder.fg(RGB::named(SKYBLUE)).line_wrap(air),
+        };
+        match e.power {
+            0 => builder.line_wrap("(v1)"),
+            1 => builder.line_wrap("(v2)"),
+            2 => builder.line_wrap("(v3)"),
+            _ => panic!("invalid power"),
         };
     } else {
         builder.fg(RGB::named(GRAY)).line_wrap("___");
@@ -88,7 +94,7 @@ fn grapple_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
         ess[0].clone(),
         builder,
     );
-    builder.fg(RGB::named(WHITE)).append("to you.");
+    builder.fg(RGB::named(WHITE)).line_wrap("to you.");
 }
 
 #[derive(Debug, Clone)]
