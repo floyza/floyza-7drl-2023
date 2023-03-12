@@ -187,6 +187,10 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
             });
             false
         }
+        Command::GetHelp => {
+            state.operating_mode = OperatingMode::HelpMenu;
+            false
+        }
         _ => false,
     }
 }

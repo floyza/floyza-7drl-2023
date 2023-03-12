@@ -1,0 +1,14 @@
+Welcome to the Elemental Caverns! Your quest is to journey down and reach the end of depth 6. Pick up artifacts off the ground, attach them to yourself, and kill monsters to re-infuse them with power.
+Descend stairs to restore health.
+
+Controls:
+----------
+Movement: vi-keys or numpad
+Use stairs: '>'
+Pick up items: 'g'
+Equip artifact: 'i'
+Look around: 'x' or '/'
+Forge finished artifact: 'a'
+Wait in place: '.'
+Use activated artifact: '1'-'9'
+Get this help screen: '?' or 'c'

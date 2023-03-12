@@ -1,6 +1,6 @@
 use crate::{
-    components::*, debug, equipment::print_desc, map, mapping::Command, State, WINDOW_HEIGHT,
-    WINDOW_WIDTH,
+    components::*, debug, equipment::print_desc, map, mapping::Command, systems::viewer_look,
+    State, WINDOW_HEIGHT, WINDOW_WIDTH,
 };
 use bracket_lib::prelude::*;
 
@@ -59,13 +59,14 @@ pub fn draw_side_info(state: &State, ctx: &mut BTerm) {
         .unwrap();
     let (health, player) = query.get().unwrap();
 
-    ctx.print(1, 1, format!("Health: {}/{}", health.hp, health.max_hp));
+    ctx.print(1, 1, format!("Depth: {}", state.map.depth + 1));
+    ctx.print(1, 2, format!("Health: {}/{}", health.hp, health.max_hp));
 
     let bar_width = LEFT_SIDEBAR_WIDTH - 3;
 
     ctx.draw_bar_horizontal(
         1,
-        2,
+        3,
         bar_width,
         health.hp,
         health.max_hp,
@@ -73,20 +74,20 @@ pub fn draw_side_info(state: &State, ctx: &mut BTerm) {
         RGB::named(GRAY),
     );
 
-    let mut line = 1;
-    ctx.print(1, 3 + line, "Actives:");
+    let mut line = 5;
+    ctx.print(1, line, "Actives:");
     line += 1;
     for (i, eq) in player.active_equipment.iter().enumerate() {
         let eq = eq.as_ref().unwrap(); // we are not ever rendering while executing effects
-        ctx.print(1, 3 + line, format!("{}){:?}", i + 1, eq.ingredients.0));
+        ctx.print(1, line, format!("{}){:?}", i + 1, eq.ingredients.0));
         line += 1;
     }
     line += 1;
-    ctx.print(1, 3 + line, "Passives:");
+    ctx.print(1, line, "Passives:");
     line += 1;
     for eq in player.passive_equipment.iter() {
         let eq = eq.as_ref().unwrap(); // we are not ever rendering while executing effects
-        ctx.print(1, 3 + line, format!("{:?}", eq.ingredients.0));
+        ctx.print(1, line, format!("{:?}", eq.ingredients.0));
         line += 1;
     }
 
@@ -176,10 +177,10 @@ pub fn update_message_log(command: Command) -> bool {
 }
 
 pub fn draw_message_log(state: &State, ctx: &mut BTerm) {
-    let x = 5;
+    let x = 20;
     let y = 5;
     let w = 50;
-    let h = 20;
+    let h = 50;
     ctx.draw_box(x, y, w, h, RGB::named(WHITE), RGB::named(BLACK));
     ctx.print_centered_at(x + w / 2, y, "Message Log");
 
@@ -192,23 +193,97 @@ pub fn draw_message_log(state: &State, ctx: &mut BTerm) {
     }
 }
 
-pub fn update_main_menu(command: Command) -> bool {
+pub fn update_help(command: Command) -> bool {
     match command {
+        Command::Back => return true,
+        _ => return false,
+    }
+}
+
+const HELP_CONTENTS: &str = include_str!("../raws/help.txt");
+
+pub fn draw_help(ctx: &mut BTerm) {
+    let x = 4;
+    let y = 4;
+    let w = 92;
+    let h = 62;
+    ctx.draw_box(x, y, w, h, RGB::named(WHITE), RGB::named(BLACK));
+    let mut builder = TextBuilder::empty();
+    {
+        let stuff: Vec<&str> = HELP_CONTENTS.split('\n').collect();
+        for line in stuff {
+            builder.line_wrap(line).ln();
+        }
+    }
+    let mut block = TextBlock::new(x + 1, y + 1, w - 2, h - 2);
+    block.print(&builder).expect("Too long of help text");
+    let mut draw_batch = DrawBatch::new();
+    block.render_to_draw_batch(&mut draw_batch);
+    draw_batch.submit(0).unwrap();
+    render_draw_buffer(ctx).unwrap();
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct MainMenuState {
+    pub selection: i32,
+    pub xpfile: XpFile,
+    pub looking_at_help: bool,
+}
+
+pub fn update_main_menu(mut ui_state: MainMenuState, command: Command) -> (bool, MainMenuState) {
+    if ui_state.looking_at_help {
+        let done = update_help(command);
+        if done {
+            ui_state.looking_at_help = false;
+            return (false, ui_state);
+        }
+    }
+    match command {
+        Command::Move {
+            target: Point { x: 0, y: -1 },
+        } => {
+            if ui_state.selection > 0 {
+                ui_state.selection -= 1;
+            };
+        }
+        Command::Move {
+            target: Point { x: 0, y: 1 },
+        } => {
+            if ui_state.selection + 1 < 2 {
+                ui_state.selection += 1;
+            };
+        }
         Command::Select => {
-            return true;
+            if ui_state.selection == 0 {
+                return (true, ui_state);
+            } else {
+                ui_state.looking_at_help = true;
+                return (false, ui_state);
+            }
         }
         _ => {}
     }
-    return false;
+    return (false, ui_state);
 }
 
-pub fn draw_main_menu(_state: &State, ctx: &mut BTerm) {
-    let x = 5;
-    let y = 5;
-    let w = WINDOW_WIDTH - 10;
-    let h = WINDOW_HEIGHT - 10;
+pub fn draw_main_menu(ui_state: &MainMenuState, _state: &State, ctx: &mut BTerm) {
+    if ui_state.looking_at_help {
+        draw_help(ctx);
+        return;
+    }
+    let x = 4;
+    let y = 4;
+    let w = 92;
+    let h = 62;
     ctx.draw_box(x, y, w, h, RGB::named(WHITE), RGB::named(BLACK));
-    ctx.print(x + 2, y + 2, "Game start!");
+    ctx.render_xp_sprite(&ui_state.xpfile, x + 1, y + 1);
+    ctx.set(
+        x + 1 + 29,
+        y + 1 + 20 + ui_state.selection * 2,
+        RGB::from_hex("#69008C").unwrap(),
+        RGB::named(BLACK),
+        to_cp437('>'),
+    );
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -226,7 +301,7 @@ pub fn draw_equip_examine(ui_state: &EquipExamineState, state: &State, ctx: &mut
         equip = &player.active_equipment[ui_state.selection as usize];
         ctx.set(
             0,
-            5 + ui_state.selection,
+            6 + ui_state.selection,
             RGB::named(WHITE),
             RGB::named(BLACK),
             to_cp437('>'),
@@ -239,7 +314,7 @@ pub fn draw_equip_examine(ui_state: &EquipExamineState, state: &State, ctx: &mut
         equip = &player.passive_equipment[sel as usize];
         ctx.set(
             0,
-            7 + ui_state.selection as i32,
+            8 + ui_state.selection as i32,
             RGB::named(WHITE),
             RGB::named(BLACK),
             to_cp437('>'),
@@ -447,7 +522,7 @@ pub fn update_inventory_ui(
 }
 
 pub fn draw_inventory_ui(ui_state: &InvUIState, state: &State, ctx: &mut BTerm) {
-    let x = 5;
+    let x = 20;
     let y = 5;
     let w = 30;
     let h = 20;
@@ -634,4 +709,10 @@ pub fn draw_examine_ui(ui_state: &ExamineUIState, state: &State, ctx: &mut BTerm
             "Nothing",
         );
     }
+}
+
+embedded_resource!(RES_MAIN_MENU, "../assets/main-menu.xp");
+
+pub fn load_menus_xp() {
+    link_resource!(RES_MAIN_MENU, "../assets/main-menu.xp");
 }

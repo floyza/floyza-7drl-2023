@@ -55,10 +55,11 @@ pub enum OperatingMode {
         state: ui::ExamineUIState,
         equipment: usize,
     },
-    MainMenu,
+    MainMenu(ui::MainMenuState),
     GameOver,
     GameWon,
     EquipmentExamining(ui::EquipExamineState),
+    HelpMenu,
 }
 
 impl State {
@@ -84,8 +85,8 @@ impl State {
             OperatingMode::EquipmentTargetting { state: s, .. } => {
                 ui::draw_examine_ui(s, self, ctx)
             }
-            OperatingMode::MainMenu => {
-                draw_main_menu(self, ctx);
+            OperatingMode::MainMenu(s) => {
+                draw_main_menu(s, self, ctx);
             }
             OperatingMode::GameOver => {
                 todo!();
@@ -94,6 +95,7 @@ impl State {
                 todo!();
             }
             OperatingMode::EquipmentExamining(s) => ui::draw_equip_examine(s, self, ctx),
+            OperatingMode::HelpMenu => ui::draw_help(ctx),
         }
     }
 }
@@ -248,11 +250,13 @@ impl GameState for State {
                         break;
                     }
                 }
-                OperatingMode::MainMenu => {
+                OperatingMode::MainMenu(s) => {
                     if let Some(command) = mapping::get_command(ctx) {
-                        let res = update_main_menu(command);
+                        let (res, s) = update_main_menu(s.clone(), command);
                         if res {
                             self.operating_mode = OperatingMode::Ticking;
+                        } else {
+                            self.operating_mode = OperatingMode::MainMenu(s);
                         }
                     } else {
                         break;
@@ -284,6 +288,16 @@ impl GameState for State {
                         break;
                     }
                 }
+                OperatingMode::HelpMenu => {
+                    if let Some(command) = mapping::get_command(ctx) {
+                        let done = ui::update_help(command);
+                        if done {
+                            self.operating_mode = OperatingMode::Ticking;
+                        }
+                    } else {
+                        break;
+                    }
+                }
             }
         }
         self.render(ctx);
@@ -293,6 +307,7 @@ impl GameState for State {
 fn main() -> BError {
     raws::load_raws();
     blueprint::load_blueprints();
+    ui::load_menus_xp();
 
     let mut rng = RandomNumberGenerator::new();
     let mut world = World::new();
@@ -300,7 +315,7 @@ fn main() -> BError {
     // let map = map::Map::make_last_room(&mut rng);
     let player_pos = map.rooms[0].center();
     let bp: Blueprint = serde_json::from_str(
-        r##"{ "img": "Armor", "equipment": "Armor", "filled": [[0, {"element":"Water", "power":2}]] }"##,
+        r##"{ "img": "Gun", "equipment": "Gun", "filled": [[0, {"element":"Air", "power":2}]] }"##,
     )
     .unwrap();
     let equip = equipment::build_blueprint(&bp);
@@ -309,8 +324,8 @@ fn main() -> BError {
         Position(player_pos),
         Player {
             current_blueprint: None,
-            passive_equipment: vec![Some(equip)],
-            active_equipment: vec![],
+            passive_equipment: vec![],
+            active_equipment: vec![Some(equip)],
         },
         Viewer {
             visible_tiles: Vec::new(),
@@ -342,7 +357,11 @@ fn main() -> BError {
         },
         has_moved: false,
         turn_order: VecDeque::new(),
-        operating_mode: OperatingMode::MainMenu,
+        operating_mode: OperatingMode::MainMenu(ui::MainMenuState {
+            selection: 0,
+            xpfile: XpFile::from_resource("../assets/main-menu.xp").unwrap(),
+            looking_at_help: false,
+        }),
         debug: true,
     };
 
@@ -352,7 +371,7 @@ fn main() -> BError {
     item_fill_map(&mut state);
 
     let context = BTermBuilder::simple(WINDOW_WIDTH, WINDOW_HEIGHT)?
-        .with_title("tba")
+        .with_title("Elemental Caverns")
         .build()?;
     main_loop(context, state)
 }

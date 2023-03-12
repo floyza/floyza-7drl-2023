@@ -246,6 +246,23 @@
             "equipment": "Grapple"
           }
         }
+      ],
+      [
+        { "Name": "Elemental Cannon" },
+        {
+          "Renderable": {
+            "glyph": "¡",
+            "fg": "#8a2be2",
+            "bg": "#000000",
+            "layer": 0
+          }
+        },
+        {
+          "Blueprint": {
+            "img": "Gun",
+            "equipment": "Gun"
+          }
+        }
       ]
     ],
     "1": [
@@ -299,6 +316,23 @@
             "equipment": "Grapple"
           }
         }
+      ],
+      [
+        { "Name": "Elemental Cannon" },
+        {
+          "Renderable": {
+            "glyph": "¡",
+            "fg": "#8a2be2",
+            "bg": "#000000",
+            "layer": 0
+          }
+        },
+        {
+          "Blueprint": {
+            "img": "Gun",
+            "equipment": "Gun"
+          }
+        }
       ]
     ],
     "2": [
@@ -350,6 +384,23 @@
           "Blueprint": {
             "img": "Grapple",
             "equipment": "Grapple"
+          }
+        }
+      ],
+      [
+        { "Name": "Elemental Cannon" },
+        {
+          "Renderable": {
+            "glyph": "¡",
+            "fg": "#8a2be2",
+            "bg": "#000000",
+            "layer": 0
+          }
+        },
+        {
+          "Blueprint": {
+            "img": "Gun",
+            "equipment": "Gun"
           }
         }
       ]

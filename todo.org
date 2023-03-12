@@ -1,12 +1,14 @@
 #+title: Todo
 
-* make monster movement more normal
+* WAIT make monster movement more normal
 They should walk towards you even if there's a blocking monster
 Also, they shouldn't be omniscient and be able to route around the whole map to get to you.
-* make slowed enemies move slower + blue bg
-* ui for examining equipment
-* find cause of pathfinding slowdown
+* DONE make slowed enemies move slower + blue bg
+* DONE ui for examining equipment
+* WAIT find cause of pathfinding slowdown
+* change color scheme
+* you forge a __ uses wrong name
 * IMPORTANT
-** main menu
+** DONE main menu
 plus help file
 ** numpad test

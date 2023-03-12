@@ -14,6 +14,7 @@ pub enum Command {
     CreateItem,
     UseActive(i32),
     EquipExamine,
+    GetHelp,
 }
 
 pub fn get_command(ctx: &mut BTerm) -> Option<Command> {
@@ -21,10 +22,12 @@ pub fn get_command(ctx: &mut BTerm) -> Option<Command> {
         if ctx.shift {
             match key {
                 VirtualKeyCode::Period => Some(Command::DescendStairs),
+                VirtualKeyCode::Slash => Some(Command::GetHelp),
                 _ => None,
             }
         } else {
             match key {
+                VirtualKeyCode::C => Some(Command::GetHelp),
                 VirtualKeyCode::E => Some(Command::EquipExamine),
                 VirtualKeyCode::D => Some(Command::DescendStairs),
                 VirtualKeyCode::H | VirtualKeyCode::Left | VirtualKeyCode::Numpad4 => {

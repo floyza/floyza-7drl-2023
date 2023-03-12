@@ -17,7 +17,7 @@ use crate::{
 pub enum EquipmentType {
     Sword,   // 1 arg - effect
     Armor,   // 1 arg - effect
-    Gun,     // parameters: targeting, effect
+    Gun,     // 1 arg - effect
     Grapple, // 1 arg - targetting
 }
 
@@ -32,7 +32,7 @@ pub fn print_desc(typ: EquipmentType, ess: &Vec<Option<Essence>>, builder: &mut 
     match typ {
         EquipmentType::Sword => sword_desc(ess, builder),
         EquipmentType::Armor => armor_desc(ess, builder),
-        EquipmentType::Gun => todo!(),
+        EquipmentType::Gun => gun_desc(ess, builder),
         EquipmentType::Grapple => grapple_desc(ess, builder),
     };
 }
@@ -97,6 +97,14 @@ fn grapple_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
         builder,
     );
     builder.fg(RGB::named(WHITE)).line_wrap("to you.");
+}
+
+fn gun_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
+    builder.fg(RGB::named(WHITE)).line_wrap("Shoot a");
+    colorize_print_element("damaging", "TODO", "pushing", ess[0].clone(), builder);
+    builder
+        .fg(RGB::named(WHITE))
+        .line_wrap("bullet at an enemy.");
 }
 
 #[derive(Debug, Clone)]
@@ -408,7 +416,49 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                 img: bp.img,
             };
         }
-        EquipmentType::Gun => {}
+        EquipmentType::Gun => {
+            debug_assert!(gems.len() == 1);
+            let eff = match gems[0].element {
+                Elemental::Fire => |s: &mut State, pt, gems: &Vec<Essence>| {
+                    if let Some(e) = get_thing_with_thing_at_pos::<&Monster>(s, pt) {
+                        let health = s.ecs.query_one_mut::<&mut Health>(e).unwrap();
+                        let dam = (gems[0].power + 1) * 2;
+                        health.hp -= dam;
+                        let name = s.ecs.query_one_mut::<&Name>(e).unwrap();
+                        s.messages.enqueue_message(&format!(
+                            "You shoot the {} and deal {dam} damage.",
+                            name.0
+                        ));
+                    }
+                },
+                Elemental::Water => |s: &mut State, pt, gems: &Vec<Essence>| {
+                    todo!();
+                    // if let Some(e) = get_thing_with_thing_at_pos::<&Monster>(s, pt) {
+                    //     let player_pos =
+                    //         s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
+                    //     push_entity_in_line_to(s, e, player_pos);
+                    //     let name = s.ecs.query_one_mut::<&Name>(e).unwrap();
+                    //     s.messages
+                    //         .enqueue_message(&format!("You hook the {}.", name.0));
+                    // }
+                },
+                Elemental::Air => |s: &mut State, pt, gems: &Vec<Essence>| {
+                    let player_pos = s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
+                    if let Some(target) = get_thing_with_thing_at_pos::<&Monster>(s, pt) {
+                        let dest = pt + normalize_pt(pt - player_pos) * (gems[0].power + 1);
+                        push_entity_in_line_to(s, target, dest);
+                        let name = s.ecs.query_one_mut::<&Name>(target).unwrap();
+                        s.messages
+                            .enqueue_message(&format!("You blast the {} backwards.", name.0));
+                    }
+                },
+            };
+            let eff = EquipmentEffect::Active(ActiveEquipment::TargetEffect(eff));
+            return Equipment {
+                ingredients: (EquipmentType::Gun, gems),
+                effect: eff,
+                img: bp.img,
+            };
+        }
     }
-    todo!();
 }
