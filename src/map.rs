@@ -1,10 +1,7 @@
 use std::collections::BTreeMap;
 
 use crate::{
-    components::*,
-    item::spawn_item,
-    monster::{spawn_monster, spawn_monster_idx},
-    ui, OperatingMode, WINDOW_HEIGHT, WINDOW_WIDTH,
+    components::*, monster::spawn_monster_idx, ui, OperatingMode, WINDOW_HEIGHT, WINDOW_WIDTH,
 };
 use bracket_lib::prelude::*;
 use hecs::{Entity, Satisfies};
@@ -349,7 +346,7 @@ pub fn draw_map(state: &State, ctx: &mut BTerm) {
                 match tile {
                     Tile::Floor => {
                         glyph = to_cp437('.');
-                        fg = RGB::from_hex("#cdb5cd").unwrap();
+                        fg = RGB::from_hex("#f5f5dc").unwrap();
                     }
                     Tile::Wall => {
                         glyph = to_cp437('#');

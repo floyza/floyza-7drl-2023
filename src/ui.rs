@@ -1,6 +1,6 @@
 use crate::{
-    components::*, debug, equipment::print_desc, map, mapping::Command, systems::viewer_look,
-    State, WINDOW_HEIGHT, WINDOW_WIDTH,
+    components::*, debug, equipment::print_desc, map, mapping::Command, State, WINDOW_HEIGHT,
+    WINDOW_WIDTH,
 };
 use bracket_lib::prelude::*;
 

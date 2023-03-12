@@ -102,7 +102,7 @@ fn grapple_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
 fn gun_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
     builder.fg(RGB::named(WHITE)).line_wrap("Shoot a");
     colorize_print_element(
-        "damageing bullet at an enemy.",
+        "damaging bullet at an enemy.",
         "bullet, creating a temporary wall.",
         "pushing bullet at an enemy.",
         ess[0].clone(),
