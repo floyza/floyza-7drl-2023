@@ -23,6 +23,7 @@ pub enum Component {
     Elemental(Elemental),
     Rank(Rank),
     Slowed(Slowed),
+    TempWall(TempWall),
 }
 
 pub trait IsComponent: Debug {}
@@ -48,6 +49,7 @@ impl Component {
             Component::Elemental(c) => ecs.insert_one(entity, c),
             Component::Rank(c) => ecs.insert_one(entity, c),
             Component::Slowed(c) => ecs.insert_one(entity, c),
+            Component::TempWall(c) => ecs.insert_one(entity, c),
         }
     }
     pub fn apply(&self, mut f: impl FnMut(&dyn IsComponent)) {
@@ -69,6 +71,7 @@ impl Component {
             Component::Elemental(c) => f(c),
             Component::Rank(c) => f(c),
             Component::Slowed(c) => f(c),
+            Component::TempWall(c) => f(c),
         }
     }
 }

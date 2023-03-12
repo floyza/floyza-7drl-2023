@@ -133,6 +133,22 @@ impl GameState for State {
                             monster_act(self, *turn);
                             self.run_systems();
                             self.turn_order.rotate_left(1);
+                        } else if self.ecs.satisfies::<&TempWall>(*turn).unwrap() {
+                            let wall = self.ecs.query_one_mut::<&mut TempWall>(*turn).unwrap();
+                            wall.duration -= 1;
+                            if wall.duration <= 0 {
+                                self.ecs.despawn(*turn).unwrap();
+                                if let Some((i, _)) = self
+                                    .turn_order
+                                    .iter()
+                                    .enumerate()
+                                    .find(|(_, e)| **e == *turn)
+                                {
+                                    self.turn_order.remove(i);
+                                }
+                            } else {
+                                self.turn_order.rotate_left(1);
+                            }
                         } else {
                             panic!("Non-actor in the actor queue");
                         }
@@ -376,12 +392,12 @@ fn main() -> BError {
     let map = map::Map::make_last_room(&mut rng);
     let player_pos = map.rooms[0].center();
     let bp: Blueprint = serde_json::from_str(
-        r##"{ "img": "Gun", "equipment": "Gun", "filled": [[0, {"element":"Air", "power":2}]] }"##,
+        r##"{ "img": "Gun", "equipment": "Gun", "filled": [[0, {"element":"Water", "power":0}]] }"##,
     )
     .unwrap();
     let equip = equipment::build_blueprint(&bp);
     let player_entity = world.spawn((
-        Health { max_hp: 45, hp: 45 },
+        Health { max_hp: 30, hp: 30 },
         Position(player_pos),
         Player {
             current_blueprint: None,

@@ -101,10 +101,13 @@ fn grapple_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
 
 fn gun_desc(ess: &Vec<Option<Essence>>, builder: &mut TextBuilder) {
     builder.fg(RGB::named(WHITE)).line_wrap("Shoot a");
-    colorize_print_element("damaging", "TODO", "pushing", ess[0].clone(), builder);
-    builder
-        .fg(RGB::named(WHITE))
-        .line_wrap("bullet at an enemy.");
+    colorize_print_element(
+        "damageing bullet at an enemy.",
+        "bullet, creating a temporary wall.",
+        "pushing bullet at an enemy.",
+        ess[0].clone(),
+        builder,
+    );
 }
 
 #[derive(Debug, Clone)]
@@ -285,7 +288,7 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
             let eff = match gems[0].element {
                 Elemental::Fire => |s: &mut State, e, gems: &Vec<Essence>| {
                     let (health, name) = s.ecs.query_one_mut::<(&mut Health, &Name)>(e).unwrap();
-                    let dam = (gems[0].power + 1) * 5;
+                    let dam = (gems[0].power + 1) * 2;
                     health.hp -= dam;
                     s.messages.enqueue_message(&format!(
                         "Your sword flames, dealing {} extra damage to the {}.",
@@ -432,15 +435,24 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                     }
                 },
                 Elemental::Water => |s: &mut State, pt, gems: &Vec<Essence>| {
-                    todo!();
-                    // if let Some(e) = get_thing_with_thing_at_pos::<&Monster>(s, pt) {
-                    //     let player_pos =
-                    //         s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
-                    //     push_entity_in_line_to(s, e, player_pos);
-                    //     let name = s.ecs.query_one_mut::<&Name>(e).unwrap();
-                    //     s.messages
-                    //         .enqueue_message(&format!("You hook the {}.", name.0));
-                    // }
+                    let idx = s.map.point2d_to_index(pt);
+                    if s.map.tile_contents[idx].is_empty() {
+                        let i = s.ecs.spawn((
+                            Name("Water wall".to_string()),
+                            Position(pt),
+                            Blocker {},
+                            TempWall {
+                                duration: (gems[0].power + 1) * 2 + 1,
+                            },
+                            Renderable {
+                                glyph: to_cp437('#'),
+                                fg: RGB::from_hex("#7b68ee").unwrap(),
+                                bg: RGB::from_hex("#000000").unwrap(),
+                                layer: 1,
+                            },
+                        ));
+                        s.turn_order.push_back(i);
+                    }
                 },
                 Elemental::Air => |s: &mut State, pt, gems: &Vec<Essence>| {
                     let player_pos = s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;

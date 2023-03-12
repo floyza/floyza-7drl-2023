@@ -197,6 +197,11 @@ impl std::fmt::Display for Elemental {
     }
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct TempWall {
+    pub duration: i32,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
