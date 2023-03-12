@@ -3,12 +3,14 @@ Descend stairs to restore health.
 
 Controls:
 ----------
-Movement: vi-keys or numpad
-Use stairs: '>'
+Movement: vi-keys (hjklyubn) or numpad
+Use stairs: '>' or 'd'
 Pick up items: 'g'
 Equip artifact: 'i'
 Look around: 'x' or '/'
+Examine equipment: 'e'
 Forge finished artifact: 'a'
 Wait in place: '.'
 Use activated artifact: '1'-'9'
 Get this help screen: '?' or 'c'
+Check message log: 'm'
