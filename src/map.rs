@@ -1,6 +1,9 @@
 use std::collections::BTreeMap;
 
-use crate::{components::*, ui, OperatingMode, WINDOW_HEIGHT, WINDOW_WIDTH};
+use crate::{
+    components::*, item::spawn_item, monster::spawn_monster, ui, OperatingMode, WINDOW_HEIGHT,
+    WINDOW_WIDTH,
+};
 use bracket_lib::prelude::*;
 use hecs::{Entity, Satisfies};
 
@@ -232,8 +235,14 @@ pub fn random_room_point(map: &Map, rng: &mut RandomNumberGenerator) -> Point {
     Point::new(x, y)
 }
 
+pub fn populate_map_last_level(state: &mut State) {
+    let boss = spawn_monster(state, 666, state.map.rooms[1].center());
+    state.turn_order.push_back(boss);
+}
+
 pub fn populate_map(state: &mut State) {
     if state.map.depth == 5 {
+        populate_map_last_level(state);
         return;
     }
     let mut new_monsters: Vec<Point> = Vec::new();
@@ -266,8 +275,13 @@ pub fn populate_map(state: &mut State) {
     }
 }
 
+pub fn item_fill_last_level(state: &mut State) {
+    // spawn_item(state, 666, state.map.rooms[1].center());
+}
+
 pub fn item_fill_map(state: &mut State) {
     if state.map.depth == 5 {
+        item_fill_last_level(state);
         return;
     }
     let mut new_items: Vec<Point> = Vec::new();

@@ -81,6 +81,7 @@ pub fn player_act(state: &mut State, command: &Command) -> bool {
             }
             if let Some(item) = items.first() {
                 state.ecs.remove_one::<Position>(*item).unwrap(); // we already ascertained that it has a component
+                state.ecs.remove_one::<Ephermal>(*item).unwrap();
                 let inv = state
                     .ecs
                     .query_one_mut::<&mut Inventory>(state.player_entity)

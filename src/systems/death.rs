@@ -14,7 +14,8 @@ pub fn system_kill_dead(state: &mut State) {
         if health.hp <= 0 {
             dead.push(id);
             if let (Some(elem), Some(rank)) = (elem, rank) {
-                if state.rng.range(0, 4) == 0 {
+                if state.rng.range(0, 3) == 0 {
+                    // 1 in 3
                     reaped_essence.push(Essence {
                         element: elem.clone(),
                         power: rank.clone().0,

@@ -344,7 +344,7 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                     if let Some(e) = get_thing_with_thing_at_pos::<&Monster>(s, pt) {
                         let player_pos =
                             s.ecs.query_one_mut::<&Position>(s.player_entity).unwrap().0;
-                        let dest = pt + normalize_pt(player_pos - pt) * (gems[0].power + 1);
+                        let dest = pt + normalize_pt(player_pos - pt) * (gems[0].power + 2);
                         push_entity_in_line_to(s, e, dest);
                         let health = s.ecs.query_one_mut::<&mut Health>(e).unwrap();
                         let dam = (gems[0].power + 1) * 1;
@@ -384,7 +384,7 @@ pub fn build_blueprint(bp: &Blueprint) -> Equipment {
                                             target = potential;
                                             let dest = pt
                                                 + normalize_pt(player_pos - pt)
-                                                    * (gems[0].power + 1);
+                                                    * (gems[0].power + 2);
                                             targets.push((target, dest));
                                             continue 'chain;
                                         }
